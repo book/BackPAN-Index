@@ -1,8 +1,10 @@
 package Parse::BACKPAN::Packages::Distribution;
 use strict;
 use base qw( Class::Accessor::Fast );
-__PACKAGE__->mk_accessors(qw( prefix date dist version maturity filename
-                              cpanid distvname packages ));
+__PACKAGE__->mk_accessors(
+    qw( prefix date dist version maturity filename
+        cpanid distvname packages )
+);
 
 1;
 

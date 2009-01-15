@@ -4,8 +4,8 @@ use base qw( Class::Accessor::Fast );
 __PACKAGE__->mk_accessors(qw(prefix date size));
 
 sub url {
-  my $self = shift;
-  return "http://backpan.cpan.org/" . $self->prefix;
+    my $self = shift;
+    return "http://backpan.cpan.org/" . $self->prefix;
 }
 
 1;
