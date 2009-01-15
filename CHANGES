@@ -1,5 +1,8 @@
 Revision history for Perl module Parse::BACKPAN::Packages:
 
+0.34
+  - update the tests
+
 0.33 Sun Jun  8 10:34:48 BST 2008
   - update the tests
 

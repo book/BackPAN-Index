@@ -36,13 +36,13 @@ is($acme_colours[6]->version, "1.01");
 is($acme_colours[7]->version, "1.02");
 
 is($acme_colours[-1]->cpanid, "LBROCARD");
-is($acme_colours[-1]->date, "1177770081");
+is($acme_colours[-1]->date, "1213106995");
 is($acme_colours[-1]->dist, "Acme-Colour");
-is($acme_colours[-1]->distvname, "Acme-Colour-1.04");
-is($acme_colours[-1]->filename, "Acme-Colour-1.04.tar.gz");
+is($acme_colours[-1]->distvname, "Acme-Colour-1.06");
+is($acme_colours[-1]->filename, "Acme-Colour-1.06.tar.gz");
 is($acme_colours[-1]->maturity, "released");
-is($acme_colours[-1]->prefix, "authors/id/L/LB/LBROCARD/Acme-Colour-1.04.tar.gz");
-is($acme_colours[-1]->version, "1.04");
+is($acme_colours[-1]->prefix, "authors/id/L/LB/LBROCARD/Acme-Colour-1.06.tar.gz");
+is($acme_colours[-1]->version, "1.06");
 
 my @acmes = $p->distributions_by('LBROCARD');
 foreach my $dist (
