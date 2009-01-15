@@ -99,10 +99,11 @@ sub distributions {
 
 sub distributions_by {
     my ( $self, $author ) = @_;
+    return unless $author;
 
     my $dists_by = $self->dists_by;
 
-    my @dists = @{ $dists_by->{$author} };
+    my @dists = @{ $dists_by->{$author} || [] };
     return sort @dists;
 }
 

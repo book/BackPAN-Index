@@ -1,7 +1,7 @@
 #!perl
 use strict;
 use warnings;
-use Test::More tests => 84;
+use Test::More tests => 86;
 use lib 'lib';
 use_ok("Parse::BACKPAN::Packages");
 
@@ -47,6 +47,12 @@ is( $acme_colours[-1]->maturity,  "released" );
 is( $acme_colours[-1]->prefix,
     "authors/id/L/LB/LBROCARD/Acme-Colour-1.06.tar.gz" );
 is( $acme_colours[-1]->version, "1.06" );
+
+my @noone = $p->distributions_by('NONEXISTENTAUTHOR');
+is( scalar @noone, 0, 'No distributions for new author' );
+
+my @bogus = $p->distributions_by();
+is( scalar @bogus, 0, 'No distributions for missing author' );
 
 my @acmes = $p->distributions_by('LBROCARD');
 foreach my $dist (
