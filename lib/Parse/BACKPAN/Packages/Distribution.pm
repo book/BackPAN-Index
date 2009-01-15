@@ -1,5 +1,6 @@
 package Parse::BACKPAN::Packages::Distribution;
 use strict;
+use warnings;
 use base qw( Class::Accessor::Fast );
 __PACKAGE__->mk_accessors(
     qw( prefix date dist version maturity filename

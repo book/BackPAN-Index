@@ -9,6 +9,7 @@ Revision history for Perl module Parse::BACKPAN::Packages:
   - credit all authors/maintainers/release managers of a particular
     distribution (patch by BARBIE)
   - add a human-readable license
+  - use warnings
 
 0.33 Sun Jun  8 10:34:48 BST 2008
   - update the tests

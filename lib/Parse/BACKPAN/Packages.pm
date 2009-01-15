@@ -1,5 +1,6 @@
 package Parse::BACKPAN::Packages;
 use strict;
+use warnings;
 use App::Cache;
 use CPAN::DistnameInfo;
 use Compress::Zlib;
