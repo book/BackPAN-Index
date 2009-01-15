@@ -31,6 +31,7 @@ sub _init_files {
     my $data;
     my $url = "http://www.astray.com/tmp/backpan.txt.gz";
     my $ua  = LWP::UserAgent->new;
+    $ua->env_proxy();
     $ua->timeout(180);
     my $response = $ua->get($url);
 
