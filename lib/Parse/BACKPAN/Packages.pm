@@ -130,15 +130,13 @@ sub _init_dists_by {
         my $i = CPAN::DistnameInfo->new( $file->prefix );
         my ( $dist, $cpanid ) = ( $i->dist, $i->cpanid );
         next unless $dist && $cpanid;
-        $dist_by->{$dist} = $cpanid;
+
+        $dist_by->{$cpanid}{$dist}++;
     }
 
-    my $dists_by;
-    while ( my ( $dist, $by ) = each %$dist_by ) {
-        push @{ $dists_by->{$by} }, $dist;
-    }
+    my %dists_by = map { $_ => [ keys %{ $dist_by->{$_} } ] } keys %$dist_by;
 
-    return $dists_by;
+    return \%dists_by;
 }
 
 sub size {

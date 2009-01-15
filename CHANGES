@@ -6,6 +6,8 @@ Revision history for Perl module Parse::BACKPAN::Packages:
   - add proxy support (patch by JDHEDDEN)
   - amend distributions_by so that it returns an empty list if no
     author or a new author is passed (patch by BARBIE)
+  - credit all authors/maintainers/release managers of a particular
+    distribution (patch by BARBIE)
 
 0.33 Sun Jun  8 10:34:48 BST 2008
   - update the tests
