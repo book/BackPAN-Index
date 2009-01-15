@@ -1,0 +1,19 @@
+Revision history for Perl module Parse::BACKPAN::Packages:
+
+0.33 Sun Jun  8 10:34:48 BST 2008
+  - update the tests
+
+0.32 Tue Jan 31 10:05:49 GMT 2006
+  - update tests to show that I've passed Net::DAV::Server onto someone else
+
+0.31 Tue Jul  5 00:48:46 BST 2005
+  - we now cache the data for an hour using App::Cache
+
+0.30 Thu Jun  9 16:27:36 BST 2005
+  - added distributions_by method, which returns a list of distribution
+    names representing all the distributions that an author has uploaded
+  - added authors method
+  - fix a bug where distributions was returning subdistributions too
+
+0.29 Mon Apr 11 19:32:22 BST 2005
+  - first release
