@@ -78,9 +78,9 @@ sub distributions {
 
     my @dists;
     foreach my $file (@files) {
-        my $i    = CPAN::DistnameInfo->new( $file->prefix );
-        my $dist = $i->dist;
-        next unless ($dist || '') eq $name;
+        my $i = CPAN::DistnameInfo->new( $file->prefix );
+        my $dist = $i->dist || '';
+        next unless $dist eq $name;
         my $d = Parse::BACKPAN::Packages::Distribution->new(
             {   prefix    => $file->prefix,
                 date      => $file->date,
