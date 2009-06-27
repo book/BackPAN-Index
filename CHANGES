@@ -1,5 +1,9 @@
 Revision history for Perl module Parse::BACKPAN::Packages:
 
+0.35 Sat Jun 27 18:28:30 BST 2009
+  - avoid warning when CPAN::DistnameInfo tails to get the dist
+    (patch by Florian Ragwitz)
+
 0.34 Thu Jan 15 19:54:40 GMT 2009
   - update the tests
   - perltidy

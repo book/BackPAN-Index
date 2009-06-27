@@ -11,7 +11,7 @@ use Parse::BACKPAN::Packages::File;
 use Parse::BACKPAN::Packages::Distribution;
 use base qw( Class::Accessor::Fast );
 __PACKAGE__->mk_accessors(qw( files dists_by ));
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 
 sub new {
     my $class = shift;
