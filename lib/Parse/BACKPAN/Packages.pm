@@ -10,17 +10,23 @@ use LWP::UserAgent;
 use Parse::BACKPAN::Packages::File;
 use Parse::BACKPAN::Packages::Distribution;
 use base qw( Class::Accessor::Fast );
-__PACKAGE__->mk_accessors(qw( files dists_by ));
+__PACKAGE__->mk_accessors(qw( files dists_by no_cache ));
 our $VERSION = '0.35';
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
 
-    my $cache = App::Cache->new( { ttl => 60 * 60 } );
-    $self->files( $cache->get_code( 'files', sub { $self->_init_files() } ) );
-    $self->dists_by(
-        $cache->get_code( 'dists_by', sub { $self->_init_dists_by() } ) );
+    if ( !$self->no_cache ) {
+        my $cache = App::Cache->new( { ttl => 60 * 60 } );
+        $self->files(
+            $cache->get_code( 'files', sub { $self->_init_files() } ) );
+        $self->dists_by(
+            $cache->get_code( 'dists_by', sub { $self->_init_dists_by() } ) );
+    } else {
+        $self->files( $self->_init_files() );
+        $self->dists_by( $self->_init_dists_by() );
+    }
 
     return $self;
 }
@@ -196,6 +202,11 @@ The constructor downloads a ~1M index file from the web and parses it,
 so it might take a while to run:
 
   my $p = Parse::BACKPAN::Packages->new();
+
+By default it caches the file locally for one hour. If you do not
+want this caching then you can pass in:
+
+  my $p = Parse::BACKPAN::Packages->new( { no_cache => 1 } );
 
 =head2 authors
 

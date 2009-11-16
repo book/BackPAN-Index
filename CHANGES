@@ -1,5 +1,8 @@
 Revision history for Perl module Parse::BACKPAN::Packages:
 
+0.36
+  - add no_cache option (patch by Adriano Ferreira)
+
 0.35 Sat Jun 27 18:28:30 BST 2009
   - avoid warning when CPAN::DistnameInfo tails to get the dist
     (patch by Florian Ragwitz)

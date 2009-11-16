@@ -5,7 +5,7 @@ use Test::More tests => 86;
 use lib 'lib';
 use_ok("Parse::BACKPAN::Packages");
 
-my $p = Parse::BACKPAN::Packages->new();
+my $p = Parse::BACKPAN::Packages->new( { no_cache => 1 } );
 ok( $p->size >= 5_597_434_696, "backpan is at least 5.6G" );
 
 my $files = $p->files;
