@@ -1,6 +1,6 @@
 Revision history for Perl module Parse::BACKPAN::Packages:
 
-0.36
+0.36 Mon Nov 16 08:48:45 GMT 2009
   - add no_cache option (patch by Adriano Ferreira)
   - add an example program examples/backpan.pl (patch by Adriano Ferreira)
 
