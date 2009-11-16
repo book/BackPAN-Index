@@ -1,5 +1,6 @@
 Build.PL
 CHANGES
+examples/backpan.pl
 lib/Parse/BACKPAN/Packages.pm
 lib/Parse/BACKPAN/Packages/Distribution.pm
 lib/Parse/BACKPAN/Packages/File.pm
