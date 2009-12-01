@@ -53,4 +53,3 @@
 #!end included /usr/local/lib/perl5/5.10.1/ExtUtils/MANIFEST.SKIP
 
 t/cache/
-t/backpan.txt.gz

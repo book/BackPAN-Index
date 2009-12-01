@@ -10,6 +10,7 @@ MANIFEST.SKIP
 META.yml
 README
 t/00cache.t
+t/backpan.txt.gz
 t/dists.t
 t/lib/TestUtils.pm
 t/pod.t

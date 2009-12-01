@@ -1,6 +1,10 @@
 package Parse::BACKPAN::Packages;
+
 use strict;
 use warnings;
+
+our $VERSION = '0.36';
+
 use App::Cache;
 use CPAN::DistnameInfo;
 use Compress::Zlib;
@@ -9,13 +13,23 @@ use IO::Zlib;
 use LWP::UserAgent;
 use Parse::BACKPAN::Packages::File;
 use Parse::BACKPAN::Packages::Release;
+
 use base qw( Class::Accessor::Fast );
-__PACKAGE__->mk_accessors(qw( files dists_by dists no_cache cache_dir ));
-our $VERSION = '0.36';
+
+__PACKAGE__->mk_accessors(qw(
+    files dists_by dists no_cache cache_dir backpan_index_url
+));
+
+my %Defaults = (
+    backpan_index_url => "http://www.astray.com/tmp/backpan.txt.gz",
+);
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
+
+    $self->backpan_index_url($Defaults{backpan_index_url})
+      unless $self->backpan_index_url;
 
     my $dist_data;
     if ( !$self->no_cache ) {
@@ -43,7 +57,7 @@ sub _init_files {
     my $files;
 
     my $data;
-    my $url = "http://www.astray.com/tmp/backpan.txt.gz";
+    my $url = $self->backpan_index_url;
     my $ua  = LWP::UserAgent->new;
     $ua->env_proxy();
     $ua->timeout(180);

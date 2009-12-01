@@ -10,4 +10,3 @@ cover_db/
 nytprof*
 *.patch
 t/cache/
-t/backpan.txt.gz
