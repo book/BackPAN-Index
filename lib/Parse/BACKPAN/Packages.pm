@@ -8,7 +8,7 @@ use IO::File;
 use IO::Zlib;
 use LWP::UserAgent;
 use Parse::BACKPAN::Packages::File;
-use Parse::BACKPAN::Packages::Distribution;
+use Parse::BACKPAN::Packages::Release;
 use base qw( Class::Accessor::Fast );
 __PACKAGE__->mk_accessors(qw( files dists_by dists no_cache cache_dir ));
 our $VERSION = '0.36';
@@ -94,7 +94,7 @@ sub distributions {
         my $i = CPAN::DistnameInfo->new( $file->prefix );
         my $dist = $i->dist || '';
         next unless $dist eq $name;
-        my $d = Parse::BACKPAN::Packages::Distribution->new(
+        my $d = Parse::BACKPAN::Packages::Release->new(
             {   prefix    => $file->prefix,
                 date      => $file->date,
                 dist      => $dist,
@@ -188,7 +188,7 @@ Parse::BACKPAN::Packages - Provide an index of BACKPAN
   my $file = $p->file("authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz");
   print "That's " . $file->size . " bytes\n";
 
-  # see Parse::BACKPAN::Packages::Distribution
+  # see Parse::BACKPAN::Packages::Release
   my @acme_colours = $p->distributions("Acme-Colour");
   
   my @authors = $p->authors;
@@ -236,9 +236,9 @@ Returns an array ref of the names of all the distributions in BackPAN.
 =head2 distributions
 
 The distributions method returns a list of objects representing all
-the different versions of a distribution:
+the different releases of a distribution:
 
-  # see Parse::BACKPAN::Packages::Distribution
+  # see Parse::BACKPAN::Packages::Release
   my @acme_colours = $p->distributions("Acme-Colour");
 
 =head2 distributions_by
@@ -286,4 +286,4 @@ the same terms as Perl itself.
 =head1 SEE ALSO
 
 L<CPAN::DistInfoname>, L<Parse::BACKPAN::Packages::File>,
-L<Parse::BACKPAN::Packages::Distribution>, L<Parse::CPAN::Packages>.
+L<Parse::BACKPAN::Packages::Release>, L<Parse::CPAN::Packages>.

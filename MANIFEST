@@ -2,12 +2,16 @@ Build.PL
 CHANGES
 examples/backpan.pl
 lib/Parse/BACKPAN/Packages.pm
-lib/Parse/BACKPAN/Packages/Distribution.pm
 lib/Parse/BACKPAN/Packages/File.pm
+lib/Parse/BACKPAN/Packages/Release.pm
 Makefile.PL
 MANIFEST			This list of files
+MANIFEST.SKIP
+META.yml
 README
+t/00cache.t
+t/dists.t
+t/lib/TestUtils.pm
 t/pod.t
 t/pod_coverage.t
 t/simple.t
-META.yml

@@ -1,4 +1,4 @@
-package Parse::BACKPAN::Packages::Distribution;
+package Parse::BACKPAN::Packages::Release;
 use strict;
 use warnings;
 use base qw( Class::Accessor::Fast );
@@ -13,7 +13,7 @@ __END__
 
 =head1 NAME
 
-Parse::BACKPAN::Packages::Distribution - Represent a distribution on BACKPAN
+Parse::BACKPAN::Packages::Release - A single release of a distribution
 
 =head1 SYNOPSIS
 
@@ -31,22 +31,24 @@ Parse::BACKPAN::Packages::Distribution - Represent a distribution on BACKPAN
 
 =head1 DESCRIPTION
 
-Parse::BACKPAN::Packages::Distribution objects represent distributions
-on BACKPAN. They are turned from dists() ordered from oldest to
-newest.
+Parse::BACKPAN::Packages::Release objects represent releases,
+individual tarballs/zip files, of a distribution on BACKPAN.
+
+For example, Acme-Pony-1.2.3.tar.gz is a release of the Acme-Pony
+distribution.
 
 =head1 METHODS
 
 =head2 cpanid
 
-The cpanid method returns the PAUSE ID of the author of the distribution.
+The cpanid method returns the PAUSE ID of the author of the release.
 
   print "   CPANID: " . $acme_colours[0]->cpanid . "\n";
 
 =head2 date
 
-The date method returns the data of the release of the distribution, in
-UNIX epoch seconds:
+The date method returns the date of the release, in UNIX epoch
+seconds:
 
   print "     Date: " . $acme_colours[0]->date . "\n";
 
@@ -65,25 +67,25 @@ the version:
 
 =head2 filename
 
-The filename method returns the filename of the distribution:
+The filename method returns the filename of the release:
 
   print " Filename: " . $acme_colours[0]->filename . "\n";
 
 =head2 maturity
 
-The maturity method returns the maturity of the distribution:
+The maturity method returns the maturity of the release:
 
   print " Maturity: " . $acme_colours[0]->maturity . "\n";
 
 =head2 prefix
 
-The prefix method returns the prefix of the distribution:
+The prefix method returns the prefix of the release:
 
   print "   Prefix: " . $acme_colours[0]->prefix . "\n";
 
 =head2 version
 
-The version method returns the version of the distribution:
+The version method returns the version of the release:
 
   print "  Version: " . $acme_colours[0]->version . "\n";
 
