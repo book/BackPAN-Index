@@ -10,23 +10,30 @@ use LWP::UserAgent;
 use Parse::BACKPAN::Packages::File;
 use Parse::BACKPAN::Packages::Distribution;
 use base qw( Class::Accessor::Fast );
-__PACKAGE__->mk_accessors(qw( files dists_by no_cache ));
+__PACKAGE__->mk_accessors(qw( files dists_by dists no_cache cache_dir ));
 our $VERSION = '0.36';
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
 
+    my $dist_data;
     if ( !$self->no_cache ) {
-        my $cache = App::Cache->new( { ttl => 60 * 60 } );
+        my %cache_opts;
+        $cache_opts{ttl} = 60 * 60;
+        $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
+
+        my $cache = App::Cache->new( \%cache_opts );
         $self->files(
             $cache->get_code( 'files', sub { $self->_init_files() } ) );
-        $self->dists_by(
-            $cache->get_code( 'dists_by', sub { $self->_init_dists_by() } ) );
+        $dist_data = $cache->get_code( 'dists', sub { $self->_init_dists() } );
     } else {
         $self->files( $self->_init_files() );
-        $self->dists_by( $self->_init_dists_by() );
+        $dist_data = $self->_init_dists();
     }
+
+    $self->dists_by($dist_data->{dist_by});
+    $self->dists($dist_data->{dists});
 
     return $self;
 }
@@ -120,7 +127,7 @@ sub authors {
     return sort keys %$dists_by;
 }
 
-sub _init_dists_by {
+sub _init_dists {
     my ($self) = shift;
     my @files;
 
@@ -133,17 +140,22 @@ sub _init_dists_by {
     @files = sort { $a->date <=> $b->date } @files;
 
     my $dist_by;
+    my $dists;
     foreach my $file (@files) {
         my $i = CPAN::DistnameInfo->new( $file->prefix );
         my ( $dist, $cpanid ) = ( $i->dist, $i->cpanid );
         next unless $dist && $cpanid;
 
+        $dists->{$dist}++;
         $dist_by->{$cpanid}{$dist}++;
     }
 
     my %dists_by = map { $_ => [ keys %{ $dist_by->{$_} } ] } keys %$dist_by;
 
-    return \%dists_by;
+    return {
+        dist_by => \%dists_by,
+        dists   => [keys %$dists]
+    };
 }
 
 sub size {
@@ -214,6 +226,12 @@ The authors method returns a list of all the authors. This is meant so
 that you can pass them into the distributions_by method:
 
   my @authors = $p->authors;
+
+=head2 dists
+
+  my $distributions = $p->dists;
+
+Returns an array ref of the names of all the distributions in BackPAN.
 
 =head2 distributions
 

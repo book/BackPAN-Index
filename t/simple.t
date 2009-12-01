@@ -1,15 +1,12 @@
 #!perl
 use strict;
 use warnings;
-use Test::More tests => 86;
-use lib 'lib';
+use Test::More tests => 84;
+use lib 'lib', 't/lib';
+use TestUtils;
 use_ok("Parse::BACKPAN::Packages");
 
-my $p = Parse::BACKPAN::Packages->new( { no_cache => 1 } );
-ok( $p->size >= 5_597_434_696, "backpan is at least 5.6G" );
-
-my $files = $p->files;
-ok( scalar( keys %$files ) >= 105_996 );
+my $p = new_backpan();
 
 my $file = $p->file("authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz");
 is( $file->prefix, "authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz" );
