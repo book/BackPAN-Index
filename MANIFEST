@@ -11,7 +11,7 @@ META.yml
 README
 t/00cache.t
 t/backpan.txt.gz
-t/dists.t
+t/distributions.t
 t/lib/TestUtils.pm
 t/pod.t
 t/pod_coverage.t

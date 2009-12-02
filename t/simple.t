@@ -16,7 +16,7 @@ is( $file->url,
     "http://backpan.cpan.org/authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz"
 );
 
-my @acme_colours = $p->distributions("Acme-Colour");
+my @acme_colours = $p->releases("Acme-Colour");
 is( $acme_colours[0]->cpanid,    "LBROCARD" );
 is( $acme_colours[0]->date,      "1014330111" );
 is( $acme_colours[0]->dist,      "Acme-Colour" );

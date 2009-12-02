@@ -90,7 +90,7 @@ sub file {
     return $self->files->{$prefix};
 }
 
-sub distributions {
+sub releases {
     my ( $self, $name ) = @_;
     my @files;
 
@@ -123,6 +123,15 @@ sub distributions {
     }
 
     return @dists;
+}
+
+sub distributions {
+    my $self = shift;
+
+    # For backwards compatibilty when releases() was distributions()
+    return $self->releases(shift) if @_;
+
+    return $self->dists;
 }
 
 sub distributions_by {
@@ -203,7 +212,7 @@ Parse::BACKPAN::Packages - Provide an index of BACKPAN
   print "That's " . $file->size . " bytes\n";
 
   # see Parse::BACKPAN::Packages::Release
-  my @acme_colours = $p->distributions("Acme-Colour");
+  my @acme_colours = $p->releases("Acme-Colour");
   
   my @authors = $p->authors;
   my @acmes = $p->distributions_by('LBROCARD');
@@ -241,19 +250,20 @@ that you can pass them into the distributions_by method:
 
   my @authors = $p->authors;
 
-=head2 dists
-
-  my $distributions = $p->dists;
-
-Returns an array ref of the names of all the distributions in BackPAN.
-
 =head2 distributions
 
-The distributions method returns a list of objects representing all
+  my $distributions = $p->distributions;
+
+The distributions method returns an array ref of the names of all the
+distributions in BackPAN.
+
+=head2 releases
+
+The releases method returns a list of objects representing all
 the different releases of a distribution:
 
   # see Parse::BACKPAN::Packages::Release
-  my @acme_colours = $p->distributions("Acme-Colour");
+  my @acme_colours = $p->releases("Acme-Colour");
 
 =head2 distributions_by
 
