@@ -17,7 +17,8 @@ use Parse::BACKPAN::Packages::Release;
 use base qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw(
-    files dists_by dists no_cache cache_dir backpan_index_url
+    files dists_by dists _dist_releases
+    no_cache cache_dir backpan_index_url
 ));
 
 my %Defaults = (
@@ -40,9 +41,13 @@ sub new {
         my $cache = App::Cache->new( \%cache_opts );
         $self->files(
             $cache->get_code( 'files', sub { $self->_init_files() } ) );
+        $self->_dist_releases(
+            $cache->get_code( '_dist_releases', sub { $self->_init_dist_releases() } ) );
+
         $dist_data = $cache->get_code( 'dists', sub { $self->_init_dists() } );
     } else {
         $self->files( $self->_init_files() );
+        $self->_dist_releases( $self->_init_dist_releases() );
         $dist_data = $self->_init_dists();
     }
 
@@ -90,24 +95,20 @@ sub file {
     return $self->files->{$prefix};
 }
 
-sub releases {
+sub _init_dist_releases {
     my ( $self, $name ) = @_;
-    my @files;
+    my %releases;
 
     while ( my ( $prefix, $file ) = each %{ $self->files } ) {
-        my $prefix = $file->prefix;
-        next unless $prefix =~ m{\/$name-};
         next if $prefix =~ /\.(readme|meta)$/;
-        push @files, $file;
-    }
 
-    @files = sort { $a->date <=> $b->date } @files;
-
-    my @dists;
-    foreach my $file (@files) {
         my $i = CPAN::DistnameInfo->new( $file->prefix );
-        my $dist = $i->dist || '';
-        next unless $dist eq $name;
+
+        my $dist    = $i->dist || '';
+        # strip the .pm package suffix some authors insist on adding
+        # this is arguably a bug in CPAN::DistnameInfo.
+        $dist =~ s{\.pm$}{}i;
+
         my $d = Parse::BACKPAN::Packages::Release->new(
             {   prefix    => $file->prefix,
                 date      => $file->date,
@@ -119,11 +120,23 @@ sub releases {
                 distvname => $i->distvname,
             }
         );
-        push @dists, $d;
+
+        push @{$releases{$dist}}, $d;
     }
 
-    return @dists;
+    return \%releases;
 }
+
+
+sub releases {
+    my($self, $dist) = @_;
+
+    my $dist_releases = $self->_dist_releases;
+    my $releases = $dist_releases->{$dist} || [];
+
+    return sort { $a->date <=> $b->date } @$releases;
+}
+
 
 sub distributions {
     my $self = shift;
@@ -168,6 +181,10 @@ sub _init_dists {
         my $i = CPAN::DistnameInfo->new( $file->prefix );
         my ( $dist, $cpanid ) = ( $i->dist, $i->cpanid );
         next unless $dist && $cpanid;
+
+        # strip the .pm package suffix some authors insist on adding
+        # this is arguably a bug in CPAN::DistnameInfo.
+        $dist =~ s{\.pm$}{}i;
 
         $dists->{$dist}++;
         $dist_by->{$cpanid}{$dist}++;
