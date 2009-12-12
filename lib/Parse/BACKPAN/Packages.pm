@@ -19,6 +19,7 @@ use base qw( Class::Accessor::Fast );
 __PACKAGE__->mk_accessors(qw(
     files dists_by dists _dist_releases
     no_cache cache_dir backpan_index_url
+    only_authors
 ));
 
 my %Defaults = (
@@ -26,8 +27,12 @@ my %Defaults = (
 );
 
 sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new(@_);
+    my $class   = shift;
+    my $options = shift;
+
+    $options->{only_authors} = 1 unless exists $options->{only_authors};
+
+    my $self  = $class->SUPER::new($options);
 
     $self->backpan_index_url($Defaults{backpan_index_url})
       unless $self->backpan_index_url;
@@ -78,7 +83,10 @@ sub _init_files {
 
     foreach my $line ( split "\n", $data ) {
         my ( $prefix, $date, $size ) = split ' ', $line;
+
         next unless $size;
+        next if $prefix !~ m{^authors/} and $self->only_authors;
+
         my $file = Parse::BACKPAN::Packages::File->new(
             {   prefix => $prefix,
                 date   => $date,
