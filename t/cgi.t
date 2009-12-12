@@ -13,4 +13,4 @@ use TestUtils;
 my $p = new_backpan();
 
 my @releases = $p->releases("CGI");
-cmp_ok scalar @releases, '>=', 999;
+cmp_ok scalar @releases, '>=', 140;
