@@ -1,12 +1,19 @@
 package Parse::BACKPAN::Packages::File;
+
 use strict;
 use warnings;
-use base qw( Class::Accessor::Fast );
-__PACKAGE__->mk_accessors(qw(prefix date size));
+
+use File::Basename qw(basename);
+use CLASS;
 
 sub url {
     my $self = shift;
     return "http://backpan.cpan.org/" . $self->prefix;
+}
+
+sub filename {
+    my $self = shift;
+    return basename $self->prefix;
 }
 
 1;
@@ -55,6 +62,10 @@ The size method returns the size of the file in bytes:
 The url method returns a URL to the file:
 
   print "   URL: " . $file->url . "\n";
+
+=head2 filename
+
+Just the filename part of the prefix.
 
 =head1 AUTHOR
 

@@ -10,16 +10,13 @@ use CPAN::DistnameInfo;
 use LWP::UserAgent;
 use Compress::Zlib;
 use Path::Class ();
-use Parse::BACKPAN::Packages::File;
-use Parse::BACKPAN::Packages::Release;
-use DBI;
-use DBD::SQLite;
+use aliased 'Parse::BACKPAN::Packages::Schema';
 
 use base qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw(
-    no_cache cache_dir backpan_index_url backpan_index
-    only_authors dbh
+    no_cache cache_dir backpan_index_url backpan_index only_authors
+    schema cache debug
 ));
 
 my %Defaults = (
@@ -31,6 +28,7 @@ sub new {
     my $options = shift;
 
     $options->{only_authors} = 1 unless exists $options->{only_authors};
+    $options->{debug}        = 1 if $ENV{PARSE_BACKPAN_PACKAGES_DEBUG};
 
     my $self  = $class->SUPER::new($options);
 
@@ -43,42 +41,54 @@ sub new {
     $cache_opts{enabled}   = !$self->no_cache;
 
     my $cache = App::Cache->new( \%cache_opts );
-
-    $self->backpan_index(
-        $cache->get_code( 'backpan_index', sub { $self->_get_backpan_index } )
-    );
+    $self->cache($cache);
 
     my $dbfile = Path::Class::file($cache->directory, "backpan.sqlite");
 
     my $dbage = -e $dbfile ? time - $dbfile->stat->mtime : 2**30;
     my $should_update_db = !-e $dbfile || $self->no_cache || ($dbage > $cache_opts{ttl});
-    $self->dbh(
-        DBI->connect(
-            "dbi:SQLite:dbname=$dbfile", "", "",
-            {RaiseError => 1}
-        )
-    );
+    unlink $dbfile if $should_update_db;
+
+    $self->schema( Schema->connect("dbi:SQLite:dbname=$dbfile") );
     $self->_update_database() if $should_update_db;
 
     return $self;
 }
 
+sub _dbh {
+    my $self = shift;
+    return $self->schema->storage->dbh;
+}
+
+sub _log {
+    my $self = shift;
+    return unless $self->debug;
+    print STDERR @_, "\n";
+}
 
 sub _update_database {
     my $self = shift;
 
-    my $index = $self->backpan_index;
+    # Delay loading it into memory until we need it
+    $self->_log("Fetching BACKPAN index...");
+    $self->backpan_index(
+        $self->cache->get_code( 'backpan_index', sub { $self->_get_backpan_index } )
+    );
+    $self->_log("Done.");
 
     $self->_setup_database;
 
-    $self->dbh->begin_work;
-    foreach my $line ( split "\n", $index ) {
+    my $dbh = $self->_dbh;
+
+    $self->_log("Populating database...");
+    $dbh->begin_work;
+    foreach my $line ( split "\n", $self->backpan_index ) {
         my ( $prefix, $date, $size ) = split ' ', $line;
 
         next unless $size;
         next if $prefix !~ m{^authors/} and $self->only_authors;
 
-        $self->dbh->do(q[
+        $dbh->do(q[
             REPLACE INTO files
                    (prefix, date, size)
             VALUES (?,      ?,    ?   )
@@ -86,7 +96,7 @@ sub _update_database {
 
         next if $prefix =~ /\.(readme|meta)$/;
 
-        my $file_id = $self->dbh->last_insert_id("", "", "files", "");
+        my $file_id = $dbh->last_insert_id("", "", "files", "");
 
         my $i = CPAN::DistnameInfo->new( $prefix );
 
@@ -96,7 +106,7 @@ sub _update_database {
         # this is arguably a bug in CPAN::DistnameInfo.
         $dist =~ s{\.pm$}{}i;
 
-        $self->dbh->do(q{
+        $dbh->do(q{
             REPLACE INTO releases
                    (file, dist, version, maturity, cpanid, distvname)
             VALUES (?,    ?,    ?,       ?,        ?,      ?        )
@@ -110,7 +120,9 @@ sub _update_database {
         );
     }
 
-    $self->dbh->commit;
+    $dbh->commit;
+
+    $self->_log("Done.");
 
     return;
 }
@@ -141,9 +153,14 @@ CREATE TABLE IF NOT EXISTS releases (
 SQL
     );
 
+    my $dbh = $self->_dbh;
     for my $table (qw(files releases)) {
-        $self->dbh->do($create_for{$table});
+        $dbh->do($create_for{$table});
     }
+
+    $self->schema->rescan;
+
+    return;
 }
 
 
@@ -169,50 +186,27 @@ sub _get_backpan_index {
 sub files {
     my $self = shift;
 
-    my $files = $self->dbh->selectall_hashref(
-        "SELECT * FROM files",
-        "prefix",
-        { Slice => {} }
-    );
-
-    for my $value (values %$files) {
-        # Nice performance cheat, eh?
-        bless $value, "Parse::BACKPAN::Packages::File";
+    my %files;
+    my $rs = $self->schema->resultset('File');
+    while( my $file = $rs->next ) {
+        $files{$file->prefix} = $file;
     }
-
-    return $files;
+    
+    return \%files;
 }
 
 
 sub file {
     my ( $self, $prefix ) = @_;
 
-    my $files = $self->dbh->selectall_arrayref(
-        "SELECT * FROM files WHERE prefix = ?",
-        { Slice => {} },
-        $prefix
-    );
-
-    my $file = $files->[0];
-    bless $file, "Parse::BACKPAN::Packages::File";
-    return $file;
+    return $self->schema->resultset("File")->single({ prefix => $prefix });
 }
 
 
 sub releases {
     my($self, $dist) = @_;
 
-    my $releases = $self->dbh->selectall_arrayref(q[
-            SELECT  *
-            FROM    releases
-            WHERE   dist = ?
-        ],
-        { Slice => {} },
-        $dist
-    );
-
-    bless $_, "Parse::BACKPAN::Packages::Release" for @$releases;
-    return @$releases;
+    return $self->schema->resultset("Release")->search({ dist => $dist })->all;
 }
 
 
@@ -222,7 +216,7 @@ sub distributions {
     # For backwards compatibilty when releases() was distributions()
     return $self->releases(shift) if @_;
 
-    my $dists = $self->dbh->selectcol_arrayref(
+    my $dists = $self->_dbh->selectcol_arrayref(
         "SELECT DISTINCT dist FROM releases"
     );
     return $dists;
@@ -232,7 +226,7 @@ sub distributions_by {
     my ( $self, $author ) = @_;
     return unless $author;
 
-    my $dists = $self->dbh->selectcol_arrayref(q[
+    my $dists = $self->_dbh->selectcol_arrayref(q[
              SELECT DISTINCT dist
              FROM   releases
              WHERE  cpanid = ?
@@ -248,7 +242,7 @@ sub distributions_by {
 sub authors {
     my $self     = shift;
 
-    my $authors = $self->dbh->selectcol_arrayref(q[
+    my $authors = $self->_dbh->selectcol_arrayref(q[
         SELECT DISTINCT cpanid
         FROM     releases
         ORDER BY cpanid
@@ -260,7 +254,7 @@ sub authors {
 sub size {
     my $self = shift;
 
-    my $size = $self->dbh->selectcol_arrayref(q[
+    my $size = $self->_dbh->selectcol_arrayref(q[
         SELECT SUM(size) FROM files
     ]);
 
