@@ -211,7 +211,7 @@ sub releases {
 sub release {
     my($self, $dist, $version) = @_;
 
-    return $self->releases($dist)->search({ version => $version });
+    return $self->releases($dist)->single({ version => $version });
 }
 
 
