@@ -7,10 +7,8 @@ our $VERSION = '0.36';
 
 use App::Cache;
 use CPAN::DistnameInfo;
-use Compress::Zlib;
-use IO::File;
-use IO::Zlib;
 use LWP::UserAgent;
+use Compress::Zlib;
 use Parse::BACKPAN::Packages::File;
 use Parse::BACKPAN::Packages::Release;
 

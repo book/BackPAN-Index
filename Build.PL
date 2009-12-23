@@ -9,9 +9,10 @@ my $build = Module::Build->new(
     'App::Cache'            => '0',
     'CPAN::DistnameInfo'    => '0',
     'Class::Accessor::Fast' => '0',
-    'Compress::Zlib'        => '0',
-    'IO::Zlib'              => '0',
     'LWP::UserAgent'        => '0',
+    'Compress::Zlib'        => '0',
+  },
+  build_requires     => {
     'Test::More'            => '0',
   },
 );
