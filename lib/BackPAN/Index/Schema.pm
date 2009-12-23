@@ -1,4 +1,4 @@
-package Parse::BACKPAN::Packages::Schema;
+package BackPAN::Index::Schema;
 
 use strict;
 use warnings;
@@ -15,14 +15,19 @@ CLASS->loader_options(
 
         return $class;
     },
-    result_namespace => '+Parse::BACKPAN::Packages',
+    result_namespace => '+BackPAN::Index',
     use_namespaces => 1,
 );
+
+# Distribution is a view, Schema::Loader won't pick it up
+CLASS->load_classes({
+    "BackPAN::Index" => ["Distribution"]
+});
 
 
 =head1 NAME
 
-Parse::BACKPAN::Packages::Schema - DBIx::Class schema class
+BackPAN::Index::Schema - DBIx::Class schema class
 
 =head1 SYNOPSIS
 

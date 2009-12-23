@@ -5,189 +5,38 @@ use warnings;
 
 our $VERSION = '0.36';
 
-use App::Cache 0.37;
-use CPAN::DistnameInfo;
-use LWP::UserAgent;
-use Compress::Zlib;
-use Path::Class ();
-use aliased 'Parse::BACKPAN::Packages::Schema';
+use parent qw(Class::Accessor::Fast);
 
-use base qw( Class::Accessor::Fast );
+use BackPAN::Index;
 
 __PACKAGE__->mk_accessors(qw(
-    no_cache cache_dir backpan_index_url backpan_index only_authors
-    schema cache debug
+    _delegate
 ));
-
-my %Defaults = (
-    backpan_index_url => "http://www.astray.com/tmp/backpan.txt.gz",
-);
 
 sub new {
     my $class   = shift;
     my $options = shift;
 
-    $options->{only_authors} = 1 unless exists $options->{only_authors};
-    $options->{debug}        = 1 if $ENV{PARSE_BACKPAN_PACKAGES_DEBUG};
-
-    my $self  = $class->SUPER::new($options);
-
-    $self->backpan_index_url($Defaults{backpan_index_url})
-      unless $self->backpan_index_url;
-
-    my %cache_opts;
-    $cache_opts{ttl}       = 60 * 60;
-    $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
-    $cache_opts{enabled}   = !$self->no_cache;
-
-    my $cache = App::Cache->new( \%cache_opts );
-    $self->cache($cache);
-
-    my $dbfile = Path::Class::file($cache->directory, "backpan.sqlite");
-
-    my $dbage = -e $dbfile ? time - $dbfile->stat->mtime : 2**30;
-    my $should_update_db = !-e $dbfile || $self->no_cache || ($dbage > $cache_opts{ttl});
-    unlink $dbfile if $should_update_db;
-
-    $self->schema( Schema->connect("dbi:SQLite:dbname=$dbfile") );
-    $self->_update_database() if $should_update_db;
-
-    return $self;
+    my $backpan = BackPAN::Index->new($options);
+    return $class->SUPER::new({ _delegate => $backpan });
 }
 
-sub _dbh {
+our $AUTOLOAD;
+sub AUTOLOAD {
     my $self = shift;
-    return $self->schema->storage->dbh;
+    my($method) = $AUTOLOAD =~ /:: ([^:]+) $/x;
+
+    # Skip things like DESTROY
+    return if uc $method eq $method;
+
+    $self->_delegate->$method(@_);
 }
-
-sub _log {
-    my $self = shift;
-    return unless $self->debug;
-    print STDERR @_, "\n";
-}
-
-sub _update_database {
-    my $self = shift;
-
-    # Delay loading it into memory until we need it
-    $self->_log("Fetching BACKPAN index...");
-    $self->backpan_index(
-        $self->cache->get_code( 'backpan_index', sub { $self->_get_backpan_index } )
-    );
-    $self->_log("Done.");
-
-    $self->_setup_database;
-
-    my $dbh = $self->_dbh;
-
-    $self->_log("Populating database...");
-    $dbh->begin_work;
-    foreach my $line ( split "\n", $self->backpan_index ) {
-        my ( $prefix, $date, $size ) = split ' ', $line;
-
-        next unless $size;
-        next if $prefix !~ m{^authors/} and $self->only_authors;
-
-        $dbh->do(q[
-            REPLACE INTO files
-                   (prefix, date, size)
-            VALUES (?,      ?,    ?   )
-        ], undef, $prefix, $date, $size);
-
-        next if $prefix =~ /\.(readme|meta)$/;
-
-        my $file_id = $dbh->last_insert_id("", "", "files", "");
-
-        my $i = CPAN::DistnameInfo->new( $prefix );
-
-        my $dist = $i->dist;
-        next unless $i->dist;
-        # strip the .pm package suffix some authors insist on adding
-        # this is arguably a bug in CPAN::DistnameInfo.
-        $dist =~ s{\.pm$}{}i;
-
-        $dbh->do(q{
-            REPLACE INTO releases
-                   (file, dist, version, maturity, cpanid, distvname)
-            VALUES (?,    ?,    ?,       ?,        ?,      ?        )
-            }, undef,
-            $prefix,
-            $dist,
-            $i->version || '',
-            $i->maturity,
-            $i->cpanid,
-            $i->distvname,
-        );
-    }
-
-    $dbh->commit;
-
-    $self->_log("Done.");
-
-    return;
-}
-
-
-sub _setup_database {
-    my $self = shift;
-
-    my %create_for = (
-        files           => <<'SQL',
-CREATE TABLE IF NOT EXISTS files (
-    prefix      TEXT            PRIMARY KEY,
-    date        INTEGER         NOT NULL,
-    size        INTEGER         NOT NULL CHECK ( size >= 0 )
-)
-SQL
-        releases        => <<'SQL',
-CREATE TABLE IF NOT EXISTS releases (
-    id          INTEGER         PRIMARY KEY,
-    file        INTEGER         NOT NULL REFERENCES files,
-    dist        TEXT            NOT NULL,
-    version     TEXT            NOT NULL,
-    maturity    TEXT            NOT NULL,
-    cpanid      TEXT            NOT NULL,
-    -- Might be different than dist-version
-    distvname   TEXT            NOT NULL
-)
-SQL
-    );
-
-    my $dbh = $self->_dbh;
-    for my $table (qw(files releases)) {
-        $dbh->do($create_for{$table});
-    }
-
-    $self->schema->rescan;
-
-    return;
-}
-
-
-sub _get_backpan_index {
-    my $self = shift;
-    
-    my $url = $self->backpan_index_url;
-    my $ua  = LWP::UserAgent->new;
-    $ua->env_proxy();
-    $ua->timeout(180);
-    my $response = $ua->get($url);
-
-    die "Error fetching $url" unless $response->is_success;
-
-    my $gzipped = $response->content;
-    my $data = Compress::Zlib::memGunzip($gzipped);
-    die "Error uncompressing data from $url" unless $data;
-
-    return $data;
-}
-
 
 sub files {
     my $self = shift;
 
     my %files;
-    my $rs = $self->schema->resultset('File');
+    my $rs = $self->_delegate->files;
     while( my $file = $rs->next ) {
         $files{$file->prefix} = $file;
     }
@@ -195,18 +44,16 @@ sub files {
     return \%files;
 }
 
-
 sub file {
     my ( $self, $prefix ) = @_;
 
-    return $self->schema->resultset("File")->single({ prefix => $prefix });
+    return $self->_delegate->files->single({ prefix => $prefix });
 }
-
 
 sub releases {
     my($self, $dist) = @_;
 
-    return $self->schema->resultset("Release")->search({ dist => $dist })->all;
+    return $self->_delegate->releases($dist)->all;
 }
 
 
@@ -216,10 +63,7 @@ sub distributions {
     # For backwards compatibilty when releases() was distributions()
     return $self->releases(shift) if @_;
 
-    my $dists = $self->_dbh->selectcol_arrayref(
-        "SELECT DISTINCT dist FROM releases"
-    );
-    return $dists;
+    return [$self->_delegate->distributions->get_column("name")->all];
 }
 
 sub distributions_by {
