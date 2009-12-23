@@ -7,7 +7,7 @@ use warnings;
 
 use lib 'lib', 't/lib';
 
-use Test::More tests => 4;
+use Test::More tests => 1;
 use TestUtils;
 
 my $p = new_backpan();
