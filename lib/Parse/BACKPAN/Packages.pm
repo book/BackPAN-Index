@@ -9,15 +9,17 @@ use App::Cache 0.37;
 use CPAN::DistnameInfo;
 use LWP::UserAgent;
 use Compress::Zlib;
+use Path::Class ();
 use Parse::BACKPAN::Packages::File;
 use Parse::BACKPAN::Packages::Release;
+use DBI;
+use DBD::SQLite;
 
 use base qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw(
-    files dists_by dists _dist_releases
-    no_cache cache_dir backpan_index_url
-    only_authors
+    no_cache cache_dir backpan_index_url backpan_index
+    only_authors dbh
 ));
 
 my %Defaults = (
@@ -38,104 +40,179 @@ sub new {
     my %cache_opts;
     $cache_opts{ttl}       = 60 * 60;
     $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
-    $cache_opts{enabled}   = !$self->{no_cache};
+    $cache_opts{enabled}   = !$self->no_cache;
 
     my $cache = App::Cache->new( \%cache_opts );
-    $self->files(
-        $cache->get_code( 'files', sub { $self->_init_files() } )
-    );
-    $self->_dist_releases(
-        $cache->get_code( '_dist_releases', sub { $self->_init_dist_releases() } )
+
+    $self->backpan_index(
+        $cache->get_code( 'backpan_index', sub { $self->_get_backpan_index } )
     );
 
-    my $dist_data = $cache->get_code( 'dists', sub { $self->_init_dists() } );
-    $self->dists_by($dist_data->{dist_by});
-    $self->dists($dist_data->{dists});
+    my $dbfile = Path::Class::file($cache->directory, "backpan.sqlite");
+
+    my $dbage = -e $dbfile ? time - $dbfile->stat->mtime : 2**30;
+    my $should_update_db = !-e $dbfile || $self->no_cache || ($dbage > $cache_opts{ttl});
+    $self->dbh(
+        DBI->connect(
+            "dbi:SQLite:dbname=$dbfile", "", "",
+            {RaiseError => 1}
+        )
+    );
+    $self->_update_database() if $should_update_db;
 
     return $self;
 }
 
-sub _init_files {
-    my $self = shift;
-    my $files;
 
-    my $data;
+sub _update_database {
+    my $self = shift;
+
+    my $index = $self->backpan_index;
+
+    $self->_setup_database;
+
+    $self->dbh->begin_work;
+    foreach my $line ( split "\n", $index ) {
+        my ( $prefix, $date, $size ) = split ' ', $line;
+
+        next unless $size;
+        next if $prefix !~ m{^authors/} and $self->only_authors;
+
+        $self->dbh->do(q[
+            REPLACE INTO files
+                   (prefix, date, size)
+            VALUES (?,      ?,    ?   )
+        ], undef, $prefix, $date, $size);
+
+        next if $prefix =~ /\.(readme|meta)$/;
+
+        my $file_id = $self->dbh->last_insert_id("", "", "files", "");
+
+        my $i = CPAN::DistnameInfo->new( $prefix );
+
+        my $dist = $i->dist;
+        next unless $i->dist;
+        # strip the .pm package suffix some authors insist on adding
+        # this is arguably a bug in CPAN::DistnameInfo.
+        $dist =~ s{\.pm$}{}i;
+
+        $self->dbh->do(q{
+            REPLACE INTO releases
+                   (file, dist, version, maturity, cpanid, distvname)
+            VALUES (?,    ?,    ?,       ?,        ?,      ?        )
+            }, undef,
+            $prefix,
+            $dist,
+            $i->version || '',
+            $i->maturity,
+            $i->cpanid,
+            $i->distvname,
+        );
+    }
+
+    $self->dbh->commit;
+
+    return;
+}
+
+
+sub _setup_database {
+    my $self = shift;
+
+    my %create_for = (
+        files           => <<'SQL',
+CREATE TABLE IF NOT EXISTS files (
+    prefix      TEXT            PRIMARY KEY,
+    date        INTEGER         NOT NULL,
+    size        INTEGER         NOT NULL CHECK ( size >= 0 )
+)
+SQL
+        releases        => <<'SQL',
+CREATE TABLE IF NOT EXISTS releases (
+    id          INTEGER         PRIMARY KEY,
+    file        INTEGER         NOT NULL REFERENCES files,
+    dist        TEXT            NOT NULL,
+    version     TEXT            NOT NULL,
+    maturity    TEXT            NOT NULL,
+    cpanid      TEXT            NOT NULL,
+    -- Might be different than dist-version
+    distvname   TEXT            NOT NULL
+)
+SQL
+    );
+
+    for my $table (qw(files releases)) {
+        $self->dbh->do($create_for{$table});
+    }
+}
+
+
+sub _get_backpan_index {
+    my $self = shift;
+    
     my $url = $self->backpan_index_url;
     my $ua  = LWP::UserAgent->new;
     $ua->env_proxy();
     $ua->timeout(180);
     my $response = $ua->get($url);
 
-    if ( $response->is_success ) {
-        my $gzipped = $response->content;
-        $data = Compress::Zlib::memGunzip($gzipped);
-        die "Error uncompressing data from $url" unless $data;
-    } else {
-        die "Error fetching $url";
+    die "Error fetching $url" unless $response->is_success;
+
+    my $gzipped = $response->content;
+    my $data = Compress::Zlib::memGunzip($gzipped);
+    die "Error uncompressing data from $url" unless $data;
+
+    return $data;
+}
+
+
+sub files {
+    my $self = shift;
+
+    my $files = $self->dbh->selectall_hashref(
+        "SELECT * FROM files",
+        "prefix",
+        { Slice => {} }
+    );
+
+    for my $value (values %$files) {
+        # Nice performance cheat, eh?
+        bless $value, "Parse::BACKPAN::Packages::File";
     }
 
-    foreach my $line ( split "\n", $data ) {
-        my ( $prefix, $date, $size ) = split ' ', $line;
-
-        next unless $size;
-        next if $prefix !~ m{^authors/} and $self->only_authors;
-
-        my $file = Parse::BACKPAN::Packages::File->new(
-            {   prefix => $prefix,
-                date   => $date,
-                size   => $size,
-            }
-        );
-        $files->{$prefix} = $file;
-    }
     return $files;
 }
 
+
 sub file {
     my ( $self, $prefix ) = @_;
-    return $self->files->{$prefix};
-}
 
-sub _init_dist_releases {
-    my ( $self, $name ) = @_;
-    my %releases;
+    my $files = $self->dbh->selectall_arrayref(
+        "SELECT * FROM files WHERE prefix = ?",
+        { Slice => {} },
+        $prefix
+    );
 
-    while ( my ( $prefix, $file ) = each %{ $self->files } ) {
-        next if $prefix =~ /\.(readme|meta)$/;
-
-        my $i = CPAN::DistnameInfo->new( $file->prefix );
-
-        my $dist    = $i->dist || '';
-        # strip the .pm package suffix some authors insist on adding
-        # this is arguably a bug in CPAN::DistnameInfo.
-        $dist =~ s{\.pm$}{}i;
-
-        my $d = Parse::BACKPAN::Packages::Release->new(
-            {   prefix    => $file->prefix,
-                date      => $file->date,
-                dist      => $dist,
-                version   => $i->version,
-                maturity  => $i->maturity,
-                filename  => $i->filename,
-                cpanid    => $i->cpanid,
-                distvname => $i->distvname,
-            }
-        );
-
-        push @{$releases{$dist}}, $d;
-    }
-
-    return \%releases;
+    my $file = $files->[0];
+    bless $file, "Parse::BACKPAN::Packages::File";
+    return $file;
 }
 
 
 sub releases {
     my($self, $dist) = @_;
 
-    my $dist_releases = $self->_dist_releases;
-    my $releases = $dist_releases->{$dist} || [];
+    my $releases = $self->dbh->selectall_arrayref(q[
+            SELECT  *
+            FROM    releases
+            WHERE   dist = ?
+        ],
+        { Slice => {} },
+        $dist
+    );
 
-    return sort { $a->date <=> $b->date } @$releases;
+    bless $_, "Parse::BACKPAN::Packages::Release" for @$releases;
+    return @$releases;
 }
 
 
@@ -145,68 +222,49 @@ sub distributions {
     # For backwards compatibilty when releases() was distributions()
     return $self->releases(shift) if @_;
 
-    return $self->dists;
+    my $dists = $self->dbh->selectcol_arrayref(
+        "SELECT DISTINCT dist FROM releases"
+    );
+    return $dists;
 }
 
 sub distributions_by {
     my ( $self, $author ) = @_;
     return unless $author;
 
-    my $dists_by = $self->dists_by;
+    my $dists = $self->dbh->selectcol_arrayref(q[
+             SELECT DISTINCT dist
+             FROM   releases
+             WHERE  cpanid = ?
+             ORDER BY dist
+        ],
+        undef,
+        $author
+    );
 
-    my @dists = @{ $dists_by->{$author} || [] };
-    return sort @dists;
+    return @$dists;
 }
 
 sub authors {
     my $self     = shift;
-    my $dists_by = $self->dists_by;
-    return sort keys %$dists_by;
-}
 
-sub _init_dists {
-    my ($self) = shift;
-    my @files;
+    my $authors = $self->dbh->selectcol_arrayref(q[
+        SELECT DISTINCT cpanid
+        FROM     releases
+        ORDER BY cpanid
+    ]);
 
-    while ( my ( $prefix, $file ) = each %{ $self->files } ) {
-        my $prefix = $file->prefix;
-        next if $prefix =~ /\.(readme|meta)$/;
-        push @files, $file;
-    }
-
-    @files = sort { $a->date <=> $b->date } @files;
-
-    my $dist_by;
-    my $dists;
-    foreach my $file (@files) {
-        my $i = CPAN::DistnameInfo->new( $file->prefix );
-        my ( $dist, $cpanid ) = ( $i->dist, $i->cpanid );
-        next unless $dist && $cpanid;
-
-        # strip the .pm package suffix some authors insist on adding
-        # this is arguably a bug in CPAN::DistnameInfo.
-        $dist =~ s{\.pm$}{}i;
-
-        $dists->{$dist}++;
-        $dist_by->{$cpanid}{$dist}++;
-    }
-
-    my %dists_by = map { $_ => [ keys %{ $dist_by->{$_} } ] } keys %$dist_by;
-
-    return {
-        dist_by => \%dists_by,
-        dists   => [keys %$dists]
-    };
+    return @$authors;
 }
 
 sub size {
     my $self = shift;
-    my $size;
 
-    foreach my $file ( values %{ $self->files } ) {
-        $size += $file->size;
-    }
-    return $size;
+    my $size = $self->dbh->selectcol_arrayref(q[
+        SELECT SUM(size) FROM files
+    ]);
+
+    return $size->[0];
 }
 
 1;
