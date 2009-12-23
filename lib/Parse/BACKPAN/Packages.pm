@@ -5,7 +5,7 @@ use warnings;
 
 our $VERSION = '0.36';
 
-use App::Cache;
+use App::Cache 0.37;
 use CPAN::DistnameInfo;
 use LWP::UserAgent;
 use Compress::Zlib;
@@ -35,25 +35,20 @@ sub new {
     $self->backpan_index_url($Defaults{backpan_index_url})
       unless $self->backpan_index_url;
 
-    my $dist_data;
-    if ( !$self->no_cache ) {
-        my %cache_opts;
-        $cache_opts{ttl} = 60 * 60;
-        $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
+    my %cache_opts;
+    $cache_opts{ttl}       = 60 * 60;
+    $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
+    $cache_opts{enabled}   = !$self->{no_cache};
 
-        my $cache = App::Cache->new( \%cache_opts );
-        $self->files(
-            $cache->get_code( 'files', sub { $self->_init_files() } ) );
-        $self->_dist_releases(
-            $cache->get_code( '_dist_releases', sub { $self->_init_dist_releases() } ) );
+    my $cache = App::Cache->new( \%cache_opts );
+    $self->files(
+        $cache->get_code( 'files', sub { $self->_init_files() } )
+    );
+    $self->_dist_releases(
+        $cache->get_code( '_dist_releases', sub { $self->_init_dist_releases() } )
+    );
 
-        $dist_data = $cache->get_code( 'dists', sub { $self->_init_dists() } );
-    } else {
-        $self->files( $self->_init_files() );
-        $self->_dist_releases( $self->_init_dist_releases() );
-        $dist_data = $self->_init_dists();
-    }
-
+    my $dist_data = $cache->get_code( 'dists', sub { $self->_init_dists() } );
     $self->dists_by($dist_data->{dist_by});
     $self->dists($dist_data->{dists});
 
