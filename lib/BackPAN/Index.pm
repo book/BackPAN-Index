@@ -215,7 +215,7 @@ sub _backpan_index_has_changed {
     return 1 unless -e $file;
 
     my(undef, undef, $mod_time) = head($self->backpan_index_url);
-    return $mod_time > stat($self->_backpan_cache_file)->mtime;
+    return $mod_time > stat($self->_backpan_index_file)->mtime;
 }
 
 
