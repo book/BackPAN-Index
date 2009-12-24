@@ -5,11 +5,13 @@ use warnings;
 
 our $VERSION = '0.37';
 
+use autodie;
 use App::Cache 0.37;
 use CPAN::DistnameInfo;
-use LWP::UserAgent;
-use Compress::Zlib;
+use LWP::Simple qw(getstore head is_success);
+use Archive::Extract;
 use Path::Class ();
+use File::stat;
 use aliased 'BackPAN::Index::Schema';
 
 use base qw( Class::Accessor::Fast );
@@ -47,7 +49,7 @@ sub new {
 
     my $dbage = -e $dbfile ? time - $dbfile->stat->mtime : 2**30;
     my $should_update_db = !-e $dbfile || $self->no_cache || ($dbage > $cache_opts{ttl});
-    unlink $dbfile if $should_update_db;
+    unlink $dbfile if -e $dbfile and $should_update_db;
 
     $self->schema( Schema->connect("dbi:SQLite:dbname=$dbfile") );
     $self->_update_database() if $should_update_db;
@@ -71,9 +73,7 @@ sub _update_database {
 
     # Delay loading it into memory until we need it
     $self->_log("Fetching BackPAN index...");
-    $self->backpan_index(
-        $self->cache->get_code( 'backpan_index', sub { $self->_get_backpan_index } )
-    );
+    $self->_get_backpan_index;
     $self->_log("Done.");
 
     $self->_setup_database;
@@ -82,7 +82,10 @@ sub _update_database {
 
     $self->_log("Populating database...");
     $dbh->begin_work;
-    foreach my $line ( split "\n", $self->backpan_index ) {
+
+    open my $fh, $self->_backpan_index_file;
+    while( my $line = <$fh> ) {
+        chomp $line;
         my ( $prefix, $date, $size ) = split ' ', $line;
 
         next unless $size;
@@ -173,18 +176,46 @@ sub _get_backpan_index {
     my $self = shift;
     
     my $url = $self->backpan_index_url;
-    my $ua  = LWP::UserAgent->new;
-    $ua->env_proxy();
-    $ua->timeout(180);
-    my $response = $ua->get($url);
 
-    die "Error fetching $url" unless $response->is_success;
+    return if !$self->_backpan_index_has_changed;
 
-    my $gzipped = $response->content;
-    my $data = Compress::Zlib::memGunzip($gzipped);
-    die "Error uncompressing data from $url" unless $data;
+    my $status = getstore($url, $self->_backpan_index_archive.'');
+    die "Error fetching $url: $status" unless is_success($status);
 
-    return $data;
+    my $ae = Archive::Extract->new( archive => $self->_backpan_index_archive );
+    $ae->extract( to => $self->_backpan_index_file );
+
+    return;
+}
+
+
+sub _backpan_index_archive {
+    my $self = shift;
+
+    my $file = URI->new($self->backpan_index_url)->path;
+    $file = Path::Class::file($file)->basename;
+    return Path::Class::file($file)->absolute($self->cache->directory);
+}
+
+
+sub _backpan_index_file {
+    my $self = shift;
+
+    my $file = $self->_backpan_index_archive;
+    $file =~ s{\.[^.]+$}{};
+
+    return $file;
+}
+
+
+sub _backpan_index_has_changed {
+    my $self = shift;
+
+    my $file = $self->_backpan_index_file;
+    return 1 unless -e $file;
+
+    my(undef, undef, $mod_time) = head($self->backpan_index_url);
+    return $mod_time > stat($self->_backpan_cache_file)->mtime;
 }
 
 
