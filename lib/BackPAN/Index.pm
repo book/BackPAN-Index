@@ -235,7 +235,10 @@ sub distribution {
 sub releases {
     my($self, $dist) = @_;
 
-    return $self->schema->resultset("Release")->search({ dist => $dist });
+    my $rs = $self->schema->resultset("Release");
+    $rs->search({ dist => $dist }) if defined $dist;
+
+    return $rs;
 }
 
 
@@ -270,7 +273,7 @@ BackPAN::Index - An interface to the BackPAN index
     # These are all DBIx::Class::ResultSet's
     my $files    = $backpan->files;
     my $dists    = $backpan->distributions;
-    my $releases = $backpan->releases;
+    my $releases = $backpan->releases("Acme-Pony");
 
     # Use DBIx::Class::ResultSet methods on them
     my $release = $releases->single({ version => '1.23' });
@@ -319,9 +322,11 @@ Returns a single BackPAN::Index::Distribution object for $dist_name.
 
 =head2 releases
 
-    my $releases = $backpan->releases();
+    my $all_releases  = $backpan->releases();
+    my $dist_releases = $backpan->releases($dist_name);
 
-Returns a ResultSet representing all the releases on BackPAN.
+Returns a ResultSet representing all the releases on BackPAN.  If a
+$dist_name is given it returns the releases of just one distribution.
 
 =head2 release
 
