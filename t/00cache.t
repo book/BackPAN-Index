@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 use Test::More tests => 4;
-use lib 'lib', "t/lib";
+use lib "t/lib";
 use_ok("Parse::BACKPAN::Packages");
 
 use TestUtils;
