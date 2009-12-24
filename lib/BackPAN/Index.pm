@@ -331,6 +331,22 @@ Returns a single BackPAN::Index::Release object for the given
 $dist_name and $version.
 
 
+=head1 EXAMPLES
+
+The real power of BackPAN::Index comes from L<DBIx::Class::ResultSet>.
+Its very flexible and very powerful but not always obvious how to get
+it to do things.  Here's some examples.
+
+    # How many files are on BackPAN?
+    my $count = $backpan->files->count;
+
+    # How big is BackPAN?
+    my $size = $backpan->files->get_column("size")->sum;
+
+    # What are the names of all the distributions?
+    my @names = $backpan->distributions->get_column("name")->all;
+
+
 =head1 SEE ALSO
 
 L<DBIx::Class::ResultSet>
