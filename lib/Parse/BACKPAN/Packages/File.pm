@@ -1,4 +1,4 @@
-packages Parse::BACKPAN::Packages::File;
+package Parse::BACKPAN::Packages::File;
 
 use strict;
 use warnings;

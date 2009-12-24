@@ -1,4 +1,4 @@
-packages Parse::BACKPAN::Packages::Release;
+package Parse::BACKPAN::Packages::Release;
 
 use strict;
 use warnings;
