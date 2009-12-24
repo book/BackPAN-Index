@@ -221,7 +221,7 @@ sub _backpan_index_file {
     my $file = $self->_backpan_index_archive;
     $file =~ s{\.[^.]+$}{};
 
-    return $file;
+    return Path::Class::file($file);
 }
 
 
