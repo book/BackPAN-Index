@@ -225,7 +225,6 @@ sub files {
 }
 
 
-
 sub distribution {
     my($self, $dist) = @_;
 
@@ -238,6 +237,7 @@ sub releases {
 
     return $self->schema->resultset("Release")->search({ dist => $dist });
 }
+
 
 sub release {
     my($self, $dist, $version) = @_;
@@ -283,22 +283,57 @@ BackPAN::Index - An interface to the BackPAN index
 This downloads, caches and parses the BackPAN index into a local
 database for efficient querying.
 
-Its a pretty thin wrapper around DBIx::Class returning ResultSet's
-which makes it efficient and flexible.
+Its a pretty thin wrapper around DBIx::Class returning
+L<DBIx::Class::ResultSet> objects which makes it efficient and
+flexible.
 
 =head1 METHODS
 
 =head2 new
 
+    my $backpan = BackPAN::Index->new(\%options);
+
+Create a new object representing the BackPAN index.
+
+It will, if necessary, download the BackPAN index and compile it into
+a database for efficient storage.  Initial creation is slow, but it
+will be cached.
+
 =head2 files
+
+    my $files = $backpan->files;
+
+Returns a ResultSet representing all the files on BackPAN.
 
 =head2 distributions
 
+    my $dists = $backpan->distributions;
+
+Returns a ResultSet representing all the distributions on BackPAN.
+
 =head2 distribution
+
+    my $dists = $backpan->distribution($dist_name);
+
+Returns a single BackPAN::Index::Distribution object for $dist_name.
 
 =head2 releases
 
+    my $releases = $backpan->releases();
+
+Returns a ResultSet representing all the releases on BackPAN.
+
 =head2 release
+
+    my $release = $backpan->release($dist_name, $version);
+
+Returns a single BackPAN::Index::Release object for the given
+$dist_name and $version.
+
+
+=head1 SEE ALSO
+
+L<DBIx::Class::ResultSet>
 
 =cut
 
