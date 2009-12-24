@@ -45,14 +45,7 @@ sub new {
     my $cache = App::Cache->new( \%cache_opts );
     $self->cache($cache);
 
-    my $dbfile = Path::Class::file($cache->directory, "backpan.sqlite");
-
-    my $dbage = -e $dbfile ? time - $dbfile->stat->mtime : 2**30;
-    my $should_update_db = !-e $dbfile || $self->no_cache || ($dbage > $cache_opts{ttl});
-    unlink $dbfile if -e $dbfile and $should_update_db;
-
-    $self->schema( Schema->connect("dbi:SQLite:dbname=$dbfile") );
-    $self->_update_database() if $should_update_db;
+    $self->_update_database();
 
     return $self;
 }
@@ -76,7 +69,22 @@ sub _update_database {
     $self->_get_backpan_index;
     $self->_log("Done.");
 
+    my $cache = $self->cache;
+    my $db_file = Path::Class::file($cache->directory, "backpan.sqlite");
+
+    # Check the database file before we connect to it.  Connecting will create
+    # the file.
+    # XXX Should probably just put a timestamp in the DB
+    my $db_age = -e $db_file ? time - $db_file->stat->mtime : 2**30;
+    my $should_update_db = !-e $db_file || $self->no_cache || ($db_age > $cache->ttl);
+    unlink $db_file if -e $db_file and $should_update_db;
+
+    $self->schema( Schema->connect("dbi:SQLite:dbname=$db_file") );
     $self->_setup_database;
+
+    $should_update_db = 1 if $self->_database_is_empty;
+
+    return unless $should_update_db;
 
     my $dbh = $self->_dbh;
 
@@ -128,6 +136,15 @@ sub _update_database {
     $self->_log("Done.");
 
     return;
+}
+
+
+sub _database_is_empty {
+    my $self = shift;
+
+    return 1 unless $self->files->count;
+    return 1 unless $self->releases->count;
+    return 0;
 }
 
 
