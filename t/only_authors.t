@@ -10,5 +10,5 @@ use Test::More tests => 1;
 
 my $p = new_backpan();
 
-my @not_authors = grep !/^authors/, keys %{$p->files};
-is_deeply \@not_authors, [], "only_authors only sees authors/";
+my $files = $p->files->search({ prefix => { 'not like' => "%authors/%" } });
+is_deeply [map { $_->prefix } $files->all], [], "only_authors only sees authors/";

@@ -12,5 +12,5 @@ use TestUtils;
 
 my $p = new_backpan();
 
-my @releases = $p->releases("CGI");
-cmp_ok scalar @releases, '>=', 140;
+my $releases = $p->releases("CGI");
+cmp_ok $releases->count, '>=', 140;
