@@ -75,8 +75,13 @@ sub _update_database {
     # Check the database file before we connect to it.  Connecting will create
     # the file.
     # XXX Should probably just put a timestamp in the DB
-    my $db_age = -e $db_file ? time - $db_file->stat->mtime : 2**30;
+    my $db_mtime = $db_file->stat->mtime;
+    my $db_age = -e $db_file ? time - $db_mtime : 2**30;
     my $should_update_db = !-e $db_file || $self->no_cache || ($db_age > $cache->ttl);
+
+    # No matter what, update the DB if we got a new index file.
+    $should_update_db = 1 if $db_mtime < $self->_backpan_index_archive->stat->mtime;
+
     unlink $db_file if -e $db_file and $should_update_db;
 
     $self->schema( Schema->connect("dbi:SQLite:dbname=$db_file") );
@@ -202,6 +207,11 @@ sub _get_backpan_index {
     my $ae = Archive::Extract->new( archive => $self->_backpan_index_archive );
     $ae->extract( to => $self->_backpan_index_file );
 
+    # If the backpan index age is older than the TTL this prevents us
+    # from immediately looking again.
+    # XXX Should probably use a "last checked" semaphore file
+    $self->_backpan_index_file->touch;
+
     return;
 }
 
@@ -231,8 +241,15 @@ sub _backpan_index_has_changed {
     my $file = $self->_backpan_index_file;
     return 1 unless -e $file;
 
-    my(undef, undef, $mod_time) = head($self->backpan_index_url);
-    return $mod_time > stat($self->_backpan_index_file)->mtime;
+    my $local_mod_time = stat($file)->mtime;
+    my $local_age = time - $local_mod_time;
+    return 0 unless $local_age > $self->cache->ttl;
+
+    # We looked, don't have to look again until the ttl is up.
+    $self->_backpan_index_file->touch;
+
+    my(undef, undef, $remote_mod_time) = head($self->backpan_index_url);
+    return $remote_mod_time > $local_mod_time;
 }
 
 
