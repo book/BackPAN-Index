@@ -5,7 +5,7 @@ use warnings;
 
 use lib 't/lib';
 
-use Test::More tests => 4;
+use Test::More tests => 3;
 use TestUtils;
 
 my $p = new_backpan();
@@ -17,9 +17,9 @@ ok $p->distribution("Acme-Pony");
 
 # Pick a distribution at random, it should have releases.
 {
-    my $dist = $dists->[rand @$dists];
-    my $releases = $p->releases($dist);
-    is $releases->first->dist, $dist, "found releases for $dist";
+    my $dist = $dists->search( undef, { order_by => 'random()' } )->first;
+    my $releases = $dist->releases;
+    is $releases->first->dist, $dist->name, "found releases for ".$dist->name;
 }
 
 1;
