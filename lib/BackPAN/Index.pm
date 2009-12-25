@@ -385,6 +385,9 @@ it to do things.  Here's some examples.
     # What are the names of all the distributions?
     my @names = $backpan->distributions->get_column("name")->all;
 
+    # What file contains this release?
+    my $file = $backpan->release("Acme-Pony", 1.01)->file->prefix;
+
 
 =head1 SEE ALSO
 
