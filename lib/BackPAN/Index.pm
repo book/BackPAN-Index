@@ -75,8 +75,8 @@ sub _update_database {
     # Check the database file before we connect to it.  Connecting will create
     # the file.
     # XXX Should probably just put a timestamp in the DB
-    my $db_mtime = $db_file->stat->mtime;
-    my $db_age = -e $db_file ? time - $db_mtime : 2**30;
+    my $db_mtime = -e $db_file ? $db_file->stat->mtime : 0;
+    my $db_age = time - $db_mtime;
     my $should_update_db = !-e $db_file || $self->no_cache || ($db_age > $cache->ttl);
 
     # No matter what, update the DB if we got a new index file.
