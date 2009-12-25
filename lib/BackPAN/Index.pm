@@ -270,7 +270,7 @@ sub releases {
     my($self, $dist) = @_;
 
     my $rs = $self->schema->resultset("Release");
-    $rs->search({ dist => $dist }) if defined $dist;
+    $rs = $rs->search({ dist => $dist }) if defined $dist;
 
     return $rs;
 }
