@@ -16,6 +16,7 @@ my $build = Module::Build->new(
     'DBIx::Class::Schema::Loader'       => '0.04005',
     'Path::Class'           => '0.17',
     autodie                 => '0',
+    parent                  => '0',
   },
   build_requires     => {
     'Test::More'            => '0',

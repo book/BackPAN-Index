@@ -14,7 +14,7 @@ use Path::Class ();
 use File::stat;
 use aliased 'BackPAN::Index::Schema';
 
-use base qw( Class::Accessor::Fast );
+use parent qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw(
     no_cache cache_dir backpan_index_url backpan_index only_authors
