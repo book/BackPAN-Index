@@ -7,7 +7,7 @@ our $VERSION = '0.37';
 
 use autodie;
 use App::Cache 0.37;
-use CPAN::DistnameInfo;
+use CPAN::DistnameInfo 0.09;
 use LWP::Simple qw(getstore head is_success);
 use Archive::Extract;
 use Path::Class ();
@@ -156,9 +156,6 @@ sub _update_database {
 
         my $dist = $i->dist;
         next unless $i->dist;
-        # strip the .pm package suffix some authors insist on adding
-        # this is arguably a bug in CPAN::DistnameInfo.
-        $dist =~ s{\.pm$}{}i;
 
         $insert_release_sth->execute(
             $path,
