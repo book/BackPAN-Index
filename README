@@ -158,7 +158,20 @@ EXAMPLES
         my @releases = $backpan->dist("Moose")->releases
                                               ->search(undef, { order_by => "version" });
 
+AUTHOR
+    Michael G Schwern <schwern@pobox.com>
+
+COPYRIGHT
+    Copyright 2009, Michael G Schwern
+
+LICENSE
+    This module is free software; you can redistribute it or modify it under
+    the same terms as Perl itself.
+
 SEE ALSO
     DBIx::Class::ResultSet, BackPAN::Index::File, BackPAN::Index::Release,
     BackPAN::Index::Dist
+
+    Repository: http://github.com/acme/parse-backpan-packages Bugs:
+    http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages
 
