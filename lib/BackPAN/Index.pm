@@ -177,6 +177,9 @@ sub _update_database {
             SELECT DISTINCT dist FROM releases
     ]);
 
+    # Add indexes after inserting so as not to slow down the inserts
+    $self->_add_indexes;
+
     $dbh->commit;
 
     $self->_log("Done.");
@@ -233,6 +236,23 @@ SQL
     $self->schema->rescan;
 
     return;
+}
+
+
+sub _add_indexes {
+    my $self = shift;
+
+    my @indexes = (
+        # Speed up dists_by several orders of magnitude
+        "CREATE INDEX IF NOT EXISTS dists_by ON releases (cpanid, dist)",
+
+        # Speed up files_by a lot
+        "CREATE INDEX IF NOT EXISTS files_by ON releases (cpanid, file)",
+    );
+    my $dbh = $self->_dbh;
+    for my $sql (@indexes) {
+        $dbh->do($sql);
+    }
 }
 
 
@@ -332,11 +352,6 @@ sub dists {
 }
 
 
-1;
-
-
-__END__
-
 =head1 NAME
 
 BackPAN::Index - An interface to the BackPAN index
@@ -433,6 +448,24 @@ Defaults to a sensible location.
 
 Returns a ResultSet representing all the files on BackPAN.
 
+=head2 files_by
+
+    my $files = $backpan->files_by($cpanid);
+    my @files = $backpan->files_by($cpanid);
+
+Returns all the files by a given $cpanid.
+
+Returns either a list of BackPAN::Index::Files or a ResultSet.
+
+=cut
+
+sub files_by {
+    my $self = shift;
+    my $cpanid = shift;
+
+    return $self->files->search({ "releases.cpanid" => $cpanid }, { join => "releases" });
+}
+
 =head2 dists
 
     my $dists = $backpan->dists;
@@ -444,6 +477,25 @@ Returns a ResultSet representing all the distributions on BackPAN.
     my $dists = $backpan->dist($dist_name);
 
 Returns a single BackPAN::Index::Dist object for $dist_name.
+
+=head2 dists_by
+
+    my $dists = $backpan->dists_by($cpanid);
+    my @dists = $backpan->dists_by($cpanid);
+
+Returns the dists which contain at least one release by the given
+$cpanid.
+
+Returns either a ResultSet or a list of the Dists.
+
+=cut
+
+sub dists_by {
+    my $self = shift;
+    my $cpanid = shift;
+
+    return $self->dists->search({ "releases.cpanid" => $cpanid }, { join => "releases", distinct => 1 });
+}
 
 =head2 releases
 
@@ -460,6 +512,23 @@ $dist_name is given it returns the releases of just one distribution.
 Returns a single BackPAN::Index::Release object for the given
 $dist_name and $version.
 
+=head2 releases_by
+
+    my $releases = $backpan->releases_by($cpanid);
+    my @releases = $backpan->releases_by($cpanid);
+
+Returns all the releases of a single author.
+
+Returns either a list of Releases or a ResultSet representing those releases.
+
+=cut
+
+sub releases_by {
+    my $self   = shift;
+    my $cpanid = shift;
+
+    return $self->releases->search({ cpanid => $cpanid });
+}
 
 =head1 EXAMPLES
 
