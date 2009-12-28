@@ -82,7 +82,7 @@ __END__
 
 =head1 NAME
 
-examples/backpan.pl - a simple demo for Parse::BACKPAN::Packages
+examples/backpan.pl - a simple demo for BackPAN::Index
 
 =head1 USAGE
 
@@ -92,8 +92,9 @@ examples/backpan.pl - a simple demo for Parse::BACKPAN::Packages
 
 =head1 DESCRIPTION
 
-This demo creates a Parse::BACKPAN::Packages instance,
+This demo creates a BackPAN::Index instance,
 which downloads from web and parses a BACKPAN index
 and then shows up either the distributions of a given
 name or the the distributions of a certain CPAN author.
 
+=cut
