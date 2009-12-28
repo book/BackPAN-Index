@@ -10,12 +10,9 @@ use_ok("BackPAN::Index");
 
 use TestUtils;
 
-# Clear out any leftover cache
-TestUtils::clear_cache();
-
 # Populate the cache
 diag("Fetching the BackPAN index and creating the database. This may take a while.");
-my $p = new_backpan();
+my $p = new_backpan( update => 1 );
 isa_ok( $p, "BackPAN::Index" );
 cmp_ok( $p->files->get_column("size")->sum, '>=', 5_597_434_696, "backpan is at least 5.6G" );
 cmp_ok( $p->files->count, '>=', 105_996 );

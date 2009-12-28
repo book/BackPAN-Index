@@ -17,31 +17,36 @@ use aliased 'BackPAN::Index::Schema';
 use parent qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw(
-    no_cache cache_dir backpan_index_url only_authors debug
+    update
+    cache_ttl
+    debug
+    releases_only_from_authors
+    cache_dir
+    backpan_index_url
 
     backpan_index schema cache 
 ));
 
 my %Defaults = (
-    backpan_index_url => "http://www.astray.com/tmp/backpan.txt.gz",
+    backpan_index_url           => "http://www.astray.com/tmp/backpan.txt.gz",
+    releases_only_from_authors  => 1,
+    debug                       => 0,
+    cache_ttl                   => 60 * 60,
 );
 
 sub new {
     my $class   = shift;
     my $options = shift;
 
-    $options->{only_authors} = 1 unless exists $options->{only_authors};
-    $options->{debug}        = 1 if $ENV{PARSE_BACKPAN_PACKAGES_DEBUG};
+    # Apply defaults
+    %$options = ( %Defaults, %$options );
 
     my $self  = $class->SUPER::new($options);
 
-    $self->backpan_index_url($Defaults{backpan_index_url})
-      unless $self->backpan_index_url;
-
     my %cache_opts;
-    $cache_opts{ttl}       = 60 * 60;
+    $cache_opts{ttl}       = $self->cache_ttl;
     $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
-    $cache_opts{enabled}   = !$self->no_cache;
+    $cache_opts{enabled}   = !$self->update;
 
     my $cache = App::Cache->new( \%cache_opts );
     $self->cache($cache);
@@ -73,15 +78,25 @@ sub _update_database {
     my $cache = $self->cache;
     my $db_file = Path::Class::file($cache->directory, "backpan.sqlite");
 
-    # Check the database file before we connect to it.  Connecting will create
-    # the file.
-    # XXX Should probably just put a timestamp in the DB
-    my $db_mtime = -e $db_file ? $db_file->stat->mtime : 0;
-    my $db_age = time - $db_mtime;
-    my $should_update_db = !-e $db_file || $self->no_cache || ($db_age > $cache->ttl);
+    my $should_update_db;
+    if( ! -e $db_file ) {
+        $should_update_db = 1;
+    }
+    elsif( defined $self->update ) {
+        $should_update_db = $self->update;
+    }
+    else {
+        # Check the database file before we connect to it.  Connecting will create
+        # the file.
+        # XXX Should probably just put a timestamp in the DB
+        my $db_mtime = $db_file->stat->mtime;
+        my $db_age = time - $db_mtime;
+        $should_update_db = ($db_age > $cache->ttl);
 
-    # No matter what, update the DB if we got a new index file.
-    $should_update_db = 1 if $db_mtime < $self->_backpan_index_archive->stat->mtime;
+        # No matter what, update the DB if we got a new index file.
+        my $archive_mtime = $self->_backpan_index_archive->stat->mtime;
+        $should_update_db = 1 if $db_mtime < $archive_mtime;
+    }
 
     unlink $db_file if -e $db_file and $should_update_db;
 
@@ -97,13 +112,16 @@ sub _update_database {
     $self->_log("Populating database...");
     $dbh->begin_work;
 
+    # Get it out of the hot loop.
+    my $only_authors = $self->releases_only_from_authors;
+
     open my $fh, $self->_backpan_index_file;
     while( my $line = <$fh> ) {
         chomp $line;
         my ( $path, $date, $size ) = split ' ', $line;
 
         next unless $size;
-        next if $path !~ m{^authors/} and $self->only_authors;
+        next if $only_authors and $path !~ m{^authors/};
 
         $dbh->do(q[
             REPLACE INTO files
@@ -336,6 +354,55 @@ Create a new object representing the BackPAN index.
 It will, if necessary, download the BackPAN index and compile it into
 a database for efficient storage.  Initial creation is slow, but it
 will be cached.
+
+new() takes some options
+
+=head3 update
+
+Because it is rather large, BackPAN::Index caches a copy of the
+BackPAN index and builds a local database to speed access.  This flag
+controls if the local index is updated.
+
+If true, forces an update of the BACKPAN index.
+
+If false, the index will never be updated even if the cache is
+expired.  It will always create a new index if one does not exist.
+
+By default the index is cached and checked for updates according to
+C<<$backpan->cache_ttl>>.
+
+=head3 cache_ttl
+
+How many seconds before checking for an updated index.
+
+Defaults to an hour.
+
+=head3 debug
+
+If true, debug messages will be printed.
+
+Defaults to false.
+
+=head3 releases_only_from_authors
+
+If true, only files in the C<authors> directory will be considered as
+releases.  If false any file in the index may be considered for a
+release.
+
+Defaults to true.
+
+=head3 cache_dir
+
+Location of the cache directory.
+
+Defaults to whatever L<App::Cache> does.
+
+=head3 backpan_index_url
+
+URL to the BackPAN index.
+
+Defaults to a sensible location.
+
 
 =head2 files
 
