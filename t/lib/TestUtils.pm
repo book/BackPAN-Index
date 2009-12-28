@@ -8,7 +8,7 @@ use File::Path;
 use BackPAN::Index;
 
 use base "Exporter";
-our @EXPORT = qw(new_backpan);
+our @EXPORT = qw(new_backpan new_pbp);
 
 
 # The local cache directory for testing
@@ -37,9 +37,17 @@ sub backpan_index_url {
 
 # Init a new BackPAN::Index object with the right options for testing
 sub new_backpan {
-    my $cache_dir = File::Spec->rel2abs("t/cache");
     return BackPAN::Index->new({
-        cache_dir               => $cache_dir,
+        cache_dir               => cache_dir(),
+        backpan_index_url       => backpan_index_url(),
+        @_
+    });
+}
+
+sub new_pbp {
+    require Parse::BACKPAN::Packages;
+    return Parse::BACKPAN::Packages->new({
+        cache_dir               => cache_dir(),
         backpan_index_url       => backpan_index_url(),
         @_
     });
