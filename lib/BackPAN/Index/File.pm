@@ -22,6 +22,17 @@ sub prefix {
     return $self->path;
 }
 
+sub release {
+    my $self = shift;
+
+    my $schema = $self->result_source->schema;
+    my($release) = $schema->resultset("Release")
+                          ->search({ file => $self->path }, { rows => 1 })
+                          ->first;
+
+    return $release;
+}
+
 1;
 
 __END__
@@ -76,6 +87,13 @@ Returns a URL to the file on a BackPAN mirror.
     my $filename = $file->filename;
 
 Returns the filename part of the path.
+
+=head2 release
+
+    my $release = $file->release;
+
+Returns the release associated with this file, if any, as a
+L<BackPAN::Index::Release> instance.
 
 =head1 AUTHOR
 
