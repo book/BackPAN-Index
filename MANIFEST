@@ -3,7 +3,7 @@ CHANGES
 create_backpan_index.pl
 examples/backpan.pl
 lib/BackPAN/Index.pm
-lib/BackPAN/Index/Distribution.pm
+lib/BackPAN/Index/Dist.pm
 lib/BackPAN/Index/File.pm
 lib/BackPAN/Index/Release.pm
 lib/BackPAN/Index/Schema.pm
