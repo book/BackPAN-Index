@@ -170,6 +170,13 @@ sub _update_database {
         );
     }
 
+    # A view is too slow
+    $dbh->do(q[
+        INSERT INTO dists
+            (name)
+            SELECT DISTINCT dist FROM releases
+    ]);
+
     $dbh->commit;
 
     $self->_log("Done.");
@@ -202,7 +209,7 @@ SQL
 CREATE TABLE IF NOT EXISTS releases (
     id          INTEGER         PRIMARY KEY,
     file        INTEGER         NOT NULL REFERENCES files,
-    dist        TEXT            NOT NULL,
+    dist        TEXT            NOT NULL REFERENCES dists(name),
     version     TEXT            NOT NULL,
     maturity    TEXT            NOT NULL,
     cpanid      TEXT            NOT NULL,
@@ -211,9 +218,10 @@ CREATE TABLE IF NOT EXISTS releases (
 )
 SQL
 
-        distributions   => <<'SQL',
-CREATE VIEW IF NOT EXISTS distributions AS
-    SELECT DISTINCT dist as name FROM releases
+        dists           => <<'SQL',
+CREATE TABLE IF NOT EXISTS dists (
+    name        TEXT            PRIMARY KEY
+)
 SQL
 );
 

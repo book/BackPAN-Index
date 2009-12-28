@@ -19,11 +19,6 @@ CLASS->loader_options(
     use_namespaces => 1,
 );
 
-# Distribution is a view, Schema::Loader won't pick it up
-CLASS->load_classes({
-    "BackPAN::Index" => ["Dist"]
-});
-
 
 =head1 NAME
 

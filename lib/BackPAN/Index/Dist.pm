@@ -3,15 +3,12 @@ package BackPAN::Index::Dist;
 use strict;
 use warnings;
 
-use parent qw(DBIx::Class::Core);
-
 use CLASS;
+use BackPAN::Index::Role::AsHash;
 
 use overload
   q[""]         => sub { $_[0]->name },
   fallback      => 1;
-
-use BackPAN::Index::Role::AsHash;
 
 sub data_methods {
     return qw(name);
@@ -22,12 +19,6 @@ sub authors {
 
     return $self->releases->search(undef, { distinct => 1 })->get_column("cpanid")->all;
 }
-
-
-CLASS->table("distributions");
-CLASS->add_columns("name");
-CLASS->set_primary_key("name");
-CLASS->has_many( releases => "BackPAN::Index::Release", "dist" );
 
 1;
 
