@@ -259,10 +259,10 @@ sub files {
 }
 
 
-sub distribution {
+sub dist {
     my($self, $dist) = @_;
 
-    return $self->distributions->single({ name => $dist });
+    return $self->dists->single({ name => $dist });
 }
 
 
@@ -283,10 +283,10 @@ sub release {
 }
 
 
-sub distributions {
+sub dists {
     my $self = shift;
 
-    return $self->schema->resultset("Distribution");
+    return $self->schema->resultset("Dist");
 }
 
 
@@ -306,13 +306,13 @@ BackPAN::Index - An interface to the BackPAN index
 
     # These are all DBIx::Class::ResultSet's
     my $files    = $backpan->files;
-    my $dists    = $backpan->distributions;
+    my $dists    = $backpan->dists;
     my $releases = $backpan->releases("Acme-Pony");
 
     # Use DBIx::Class::ResultSet methods on them
     my $release = $releases->single({ version => '1.23' });
 
-    my $dist = $backpan->distribution("Test-Simple");
+    my $dist = $backpan->dist("Test-Simple");
     my $releases = $dist->releases;
 
 =head1 DESCRIPTION
@@ -342,17 +342,17 @@ will be cached.
 
 Returns a ResultSet representing all the files on BackPAN.
 
-=head2 distributions
+=head2 dists
 
-    my $dists = $backpan->distributions;
+    my $dists = $backpan->dists;
 
 Returns a ResultSet representing all the distributions on BackPAN.
 
-=head2 distribution
+=head2 dist
 
-    my $dists = $backpan->distribution($dist_name);
+    my $dists = $backpan->dist($dist_name);
 
-Returns a single BackPAN::Index::Distribution object for $dist_name.
+Returns a single BackPAN::Index::Dist object for $dist_name.
 
 =head2 releases
 
@@ -383,7 +383,7 @@ it to do things.  Here's some examples.
     my $size = $backpan->files->get_column("size")->sum;
 
     # What are the names of all the distributions?
-    my @names = $backpan->distributions->get_column("name")->all;
+    my @names = $backpan->dists->get_column("name")->all;
 
     # What file contains this release?
     my $file = $backpan->release("Acme-Pony", 1.01)->file->prefix;

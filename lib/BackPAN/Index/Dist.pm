@@ -1,4 +1,4 @@
-package BackPAN::Index::Distribution;
+package BackPAN::Index::Dist;
 
 use strict;
 use warnings;
@@ -18,7 +18,7 @@ __END__
 
 =head1 NAME
 
-BackPAN::Index::Distribution - Representing a distribution
+BackPAN::Index::Dist - Representing a distribution on BackPAN
 
 =head1 DESCRIPTION
 

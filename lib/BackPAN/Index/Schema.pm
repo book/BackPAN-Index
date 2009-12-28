@@ -21,7 +21,7 @@ CLASS->loader_options(
 
 # Distribution is a view, Schema::Loader won't pick it up
 CLASS->load_classes({
-    "BackPAN::Index" => ["Distribution"]
+    "BackPAN::Index" => ["Dist"]
 });
 
 

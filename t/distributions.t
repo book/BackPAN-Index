@@ -10,10 +10,10 @@ use TestUtils;
 
 my $p = new_backpan();
 
-my $dists = $p->distributions;
+my $dists = $p->dists;
 cmp_ok $dists->count, '>=', 21911;
 
-ok $p->distribution("Acme-Pony");
+ok $p->dist("Acme-Pony");
 
 # Pick a distribution at random, it should have releases.
 {
