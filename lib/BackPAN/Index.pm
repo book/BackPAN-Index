@@ -474,7 +474,8 @@ it to do things.  Here's some examples.
 
 =head1 SEE ALSO
 
-L<DBIx::Class::ResultSet>
+L<DBIx::Class::ResultSet>, L<BackPAN::Index::File>,
+L<BackPAN::Index::Release>, L<BackPAN::Index::Dist>
 
 =cut
 
