@@ -10,6 +10,7 @@ my $build = Module::Build->new(
     'App::Cache'            => '0',
     'CPAN::DistnameInfo'    => '0',
     'Class::Accessor::Fast' => '0',
+    CLASS                   => '1.00',
     'LWP::Simple'           => '0',
     'Archive::Extract'      => '0',
     'DBIx::Class'           => '0.08109',
