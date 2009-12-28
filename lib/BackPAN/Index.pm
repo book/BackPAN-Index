@@ -384,6 +384,14 @@ Its a pretty thin wrapper around DBIx::Class returning
 L<DBIx::Class::ResultSet> objects which makes it efficient and
 flexible.
 
+The Comprehensive Perl Archive Network (CPAN) is a very useful
+collection of Perl code. However, in order to keep CPAN relatively
+small, authors of modules can delete older versions of modules to only
+let CPAN have the latest version of a module. BackPAN is where these
+deleted modules are backed up. It's more like a full CPAN mirror, only
+without the deletions. This module provides an index of BackPAN and
+some handy methods.
+
 =head1 METHODS
 
 =head2 new

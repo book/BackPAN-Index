@@ -137,6 +137,9 @@ Parse::BACKPAN::Packages - Provide an index of BACKPAN
 
 =head1 DESCRIPTION
 
+Parse::BackPAN::Packages has been B<DEPRECATED>.  Please use the
+faster and more flexible L<BackPAN::Index>.
+
 The Comprehensive Perl Archive Network (CPAN) is a very useful
 collection of Perl code. However, in order to keep CPAN relatively
 small, authors of modules can delete older versions of modules to only
@@ -227,5 +230,4 @@ the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<CPAN::DistInfoname>, L<Parse::BACKPAN::Packages::File>,
-L<Parse::BACKPAN::Packages::Release>, L<Parse::CPAN::Packages>.
+L<BackPAN::Index>, L<CPAN::DistInfoname>
