@@ -11,6 +11,13 @@ use overload
   q[""]         => sub { $_[0]->name },
   fallback      => 1;
 
+use BackPAN::Index::Role::AsHash;
+
+sub data_methods {
+    return qw(name);
+}
+
+
 CLASS->table("distributions");
 CLASS->add_columns("name");
 CLASS->set_primary_key("name");
@@ -44,6 +51,13 @@ A ResultSet of this distribution's releases.
     my $dist_name = $dist->name;
 
 Name of the distribution.
+
+=head2 as_hash
+
+    my $data = $dist->as_hash;
+
+Returns a hash ref containing the data inside C<$dist>.
+
 
 =head1 SEE ALSO
 

@@ -7,6 +7,12 @@ use overload
   q[""]         => sub { $_[0]->distvname },
   fallback      => 1;
 
+use BackPAN::Index::Role::AsHash;
+
+sub data_methods {
+    return qw(dist version cpanid date path maturity);
+}
+
 sub date {
     my $self = shift;
     return $self->file->date;
@@ -115,6 +121,12 @@ Returns the full path on CPAN to the release.
     my $version = $release->version;
 
 Returns the version of the release:
+
+=head2 as_hash
+
+    my $data = $release->as_hash;
+
+Returns a hash ref containing the data inside C<$release>.
 
 
 =head1 AUTHOR

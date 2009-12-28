@@ -9,6 +9,12 @@ use overload
   q[""]         => sub { $_[0]->path },
   fallback      => 1;
 
+use BackPAN::Index::Role::AsHash;
+
+sub data_methods {
+    return qw(path date size);
+}
+
 sub url {
     my $self = shift;
     return "http://backpan.cpan.org/" . $self->path;
@@ -97,6 +103,13 @@ Returns the filename part of the path.
 
 Returns the release associated with this file, if any, as a
 L<BackPAN::Index::Release> instance.
+
+=head2 as_hash
+
+    my $data = $file->as_hash;
+
+Returns a hash ref containing the data inside C<$file>.
+
 
 =head1 AUTHOR
 
