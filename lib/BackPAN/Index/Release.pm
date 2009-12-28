@@ -3,8 +3,6 @@ package BackPAN::Index::Release;
 use strict;
 use warnings;
 
-use CLASS;
-
 sub date {
     my $self = shift;
     return $self->file->date;

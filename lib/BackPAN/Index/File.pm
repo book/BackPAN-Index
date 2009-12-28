@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use File::Basename qw(basename);
-use CLASS;
 
 sub url {
     my $self = shift;
