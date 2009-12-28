@@ -6,7 +6,7 @@ use lib 't/lib';
 use TestUtils;
 use_ok("Parse::BACKPAN::Packages");
 
-my $p = new_backpan();
+my $p = new_pbp();
 
 my $file = $p->file("authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz");
 is( $file->prefix, "authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz" );

@@ -100,22 +100,22 @@ sub _update_database {
     open my $fh, $self->_backpan_index_file;
     while( my $line = <$fh> ) {
         chomp $line;
-        my ( $prefix, $date, $size ) = split ' ', $line;
+        my ( $path, $date, $size ) = split ' ', $line;
 
         next unless $size;
-        next if $prefix !~ m{^authors/} and $self->only_authors;
+        next if $path !~ m{^authors/} and $self->only_authors;
 
         $dbh->do(q[
             REPLACE INTO files
-                   (prefix, date, size)
+                   (path, date, size)
             VALUES (?,      ?,    ?   )
-        ], undef, $prefix, $date, $size);
+        ], undef, $path, $date, $size);
 
-        next if $prefix =~ /\.(readme|meta)$/;
+        next if $path =~ /\.(readme|meta)$/;
 
         my $file_id = $dbh->last_insert_id("", "", "files", "");
 
-        my $i = CPAN::DistnameInfo->new( $prefix );
+        my $i = CPAN::DistnameInfo->new( $path );
 
         my $dist = $i->dist;
         next unless $i->dist;
@@ -128,7 +128,7 @@ sub _update_database {
                    (file, dist, version, maturity, cpanid, distvname)
             VALUES (?,    ?,    ?,       ?,        ?,      ?        )
             }, undef,
-            $prefix,
+            $path,
             $dist,
             $i->version || '',
             $i->maturity,
@@ -160,7 +160,7 @@ sub _setup_database {
     my %create_for = (
         files           => <<'SQL',
 CREATE TABLE IF NOT EXISTS files (
-    prefix      TEXT            PRIMARY KEY,
+    path      TEXT            PRIMARY KEY,
     date        INTEGER         NOT NULL,
     size        INTEGER         NOT NULL CHECK ( size >= 0 )
 )
@@ -386,8 +386,8 @@ it to do things.  Here's some examples.
     # What are the names of all the distributions?
     my @names = $backpan->dists->get_column("name")->all;
 
-    # What file contains this release?
-    my $file = $backpan->release("Acme-Pony", 1.01)->file->prefix;
+    # What path contains this release?
+    my $path = $backpan->release("Acme-Pony", 1.01)->file->path;
 
 
 =head1 SEE ALSO

@@ -15,9 +15,15 @@ sub filename {
     return $self->file->filename;
 }
 
+sub path {
+    my $self = shift;
+    return $self->file->path;
+}
+
+# Compatibility with PBP
 sub prefix {
     my $self = shift;
-    return $self->file->prefix;
+    return $self->file->path;
 }
 
 1;
@@ -41,7 +47,7 @@ BackPAN::Index::Release - A single release of a distribution
   print "Distvname: " . $release->distvname . "\n";
   print " Filename: " . $release->filename . "\n";
   print " Maturity: " . $release->maturity . "\n";
-  print "   Prefix: " . $release->prefix . "\n";
+  print "     Path: " . $release->path . "\n";
   print "  Version: " . $release->version . "\n";
 
 =head1 DESCRIPTION
@@ -90,9 +96,9 @@ Returns the filename of the release, just the file part.
 
 Returns the maturity of the release.
 
-=head2 prefix
+=head2 path
 
-    my $prefix = $release->prefix;
+    my $path = $release->path;
 
 Returns the full path on CPAN to the release.
 

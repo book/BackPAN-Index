@@ -38,16 +38,16 @@ sub files {
     my %files;
     my $rs = $self->_delegate->files;
     while( my $file = $rs->next ) {
-        $files{$file->prefix} = $file;
+        $files{$file->path} = $file;
     }
     
     return \%files;
 }
 
 sub file {
-    my ( $self, $prefix ) = @_;
+    my ( $self, $path ) = @_;
 
-    return $self->_delegate->files->single({ prefix => $prefix });
+    return $self->_delegate->files->single({ path => $path });
 }
 
 sub releases {

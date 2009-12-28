@@ -8,12 +8,18 @@ use CLASS;
 
 sub url {
     my $self = shift;
-    return "http://backpan.cpan.org/" . $self->prefix;
+    return "http://backpan.cpan.org/" . $self->path;
 }
 
 sub filename {
     my $self = shift;
-    return basename $self->prefix;
+    return basename $self->path;
+}
+
+# Backwards compatibility with PBP
+sub prefix {
+    my $self = shift;
+    return $self->path;
 }
 
 1;
@@ -29,7 +35,7 @@ BackPAN::Index::File - Represent a file on BackPAN
   my $b = BackPAN::Index->new();
   my $file = $b->file("authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz");
   print "  Date: " . $file->date . "\n";
-  print "Prefix: " . $file->prefix . "\n";
+  print "  Path: " . $file->path . "\n";
   print "  Size: " . $file->size . "\n";
   print "   URL: " . $file->url . "\n";
 
@@ -47,9 +53,9 @@ on BackPAN.
 
 Returns the upload date of the file, in UNIX epoch seconds.
 
-=head2 prefix
+=head2 path
 
-    my $prefix = $file->prefix;
+    my $path = $file->path;
 
 Returns the full path to the file on CPAN.
 
@@ -69,7 +75,7 @@ Returns a URL to the file on a BackPAN mirror.
 
     my $filename = $file->filename;
 
-Returns the filename part of the prefix.
+Returns the filename part of the path.
 
 =head1 AUTHOR
 
