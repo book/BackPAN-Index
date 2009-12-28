@@ -35,37 +35,41 @@ BackPAN::Index::File - Represent a file on BackPAN
 
 =head1 DESCRIPTION
 
-BackPAN::Index::File objects represent files on BackPAN.
+BackPAN::Index::File objects represent files on BackPAN.  It may
+represent a release, a readme or meta file or just some random stuff
+on BackPAN.
 
 =head1 METHODS
 
 =head2 date
 
-The date method returns the upload date of the file, in UNIX epoch seconds:
+    my $date = $file->date;
 
-  print "  Date: " . $file->date . "\n";
+Returns the upload date of the file, in UNIX epoch seconds.
 
 =head2 prefix
 
-The prefix method returns the prefix of the file:
+    my $prefix = $file->prefix;
 
-  print "Prefix: " . $file->prefix . "\n";
+Returns the full path to the file on CPAN.
 
 =head2 size
 
-The size method returns the size of the file in bytes:
+    my $size = $file->size;
 
-  print "  Size: " . $file->size . "\n";
+Returns the size of the file in bytes.
 
 =head2 url
 
-The url method returns a URL to the file:
+    my $url = $file->url;
 
-  print "   URL: " . $file->url . "\n";
+Returns a URL to the file on a BackPAN mirror.
 
 =head2 filename
 
-Just the filename part of the prefix.
+    my $filename = $file->filename;
+
+Returns the filename part of the prefix.
 
 =head1 AUTHOR
 
@@ -73,12 +77,11 @@ Leon Brocard <acme@astray.com>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005, Leon Brocard
+Copyright (C) 2005-2009, Leon Brocard
 
 This module is free software; you can redistribute it or modify it under
 the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<BackPAN::Index>
-
+L<BackPAN::Index>, L<BackPAN::Index::Release>
