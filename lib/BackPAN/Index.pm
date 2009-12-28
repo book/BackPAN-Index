@@ -125,8 +125,8 @@ sub _update_database {
 
     my $insert_release_sth = $dbh->prepare(q[
         INSERT INTO releases
-               (file, dist, version, maturity, cpanid, distvname)
-        VALUES (?,    ?,    ?,       ?,        ?,      ?        )
+               (file, dist, version, date, maturity, cpanid, distvname)
+        VALUES (?,    ?,    ?,       ?,    ?,        ?,      ?        )
     ]);
 
     my %files;
@@ -164,6 +164,7 @@ sub _update_database {
             $path,
             $dist,
             $i->version || '',
+            $date,
             $i->maturity,
             $i->cpanid,
             $i->distvname,
@@ -213,6 +214,7 @@ CREATE TABLE IF NOT EXISTS releases (
     id          INTEGER         PRIMARY KEY,
     file        INTEGER         NOT NULL REFERENCES files,
     dist        TEXT            NOT NULL REFERENCES dists(name),
+    date        INTEGER         NOT NULL,
     version     TEXT            NOT NULL,
     maturity    TEXT            NOT NULL,
     cpanid      TEXT            NOT NULL,
@@ -248,6 +250,9 @@ sub _add_indexes {
 
         # Speed up files_by a lot
         "CREATE INDEX IF NOT EXISTS files_by ON releases (cpanid, file)",
+
+        # Let us order releases by date quickly
+        "CREATE INDEX IF NOT EXISTS releases_by_date ON releases (date, dist)",
     );
     my $dbh = $self->_dbh;
     for my $sql (@indexes) {
@@ -331,10 +336,8 @@ sub dist {
 sub releases {
     my($self, $dist) = @_;
 
-    my $rs = $self->schema->resultset("Release");
-    $rs = $rs->search({ dist => $dist }) if defined $dist;
-
-    return $rs;
+    return $self->schema->resultset("Release") unless defined $dist;
+    return $self->schema->resultset("Release")->search({ dist => $dist });
 }
 
 
@@ -547,6 +550,10 @@ it to do things.  Here's some examples.
 
     # What path contains this release?
     my $path = $backpan->release("Acme-Pony", 1.01)->file->path;
+
+    # Get all the releases of Moose ordered by version
+    my @releases = $backpan->dist("Moose")->releases
+                                          ->search(undef, { order_by => "version" });
 
 
 =head1 SEE ALSO

@@ -13,11 +13,6 @@ sub data_methods {
     return qw(dist version cpanid date path maturity);
 }
 
-sub date {
-    my $self = shift;
-    return $self->file->date;
-}
-
 sub filename {
     my $self = shift;
     return $self->file->filename;
@@ -25,13 +20,13 @@ sub filename {
 
 sub path {
     my $self = shift;
-    return $self->file->path;
+    return $self->file;
 }
 
 # Compatibility with PBP
 sub prefix {
     my $self = shift;
-    return $self->file->path;
+    return $self->file;
 }
 
 1;
