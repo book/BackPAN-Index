@@ -4,7 +4,7 @@ use strict;
 my $build = Module::Build->new(
   create_makefile_pl => 'traditional',
   license            => 'perl',
-  module_name        => 'Parse::BACKPAN::Packages',
+  module_name        => 'BackPAN::Index',
 
   requires           => {
     'App::Cache'            => '0',
