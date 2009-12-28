@@ -19,10 +19,11 @@ my $build = Module::Build->new(
     'Path::Class'           => '0.17',
     autodie                 => '0',
     parent                  => '0',
+    perl                    => '5.8.1',
   },
 
   build_requires     => {
-    'Test::More'            => '0',
+    'Test::More'            => '0.90',
     'Test::Compile'         => '0.11',
   },
 

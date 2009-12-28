@@ -12,7 +12,7 @@ use LWP::Simple qw(getstore head is_success);
 use Archive::Extract;
 use Path::Class ();
 use File::stat;
-use aliased 'BackPAN::Index::Schema';
+use BackPAN::Index::Schema;
 
 use parent qw( Class::Accessor::Fast );
 
@@ -102,7 +102,7 @@ sub _update_database {
 
     unlink $db_file if -e $db_file and $should_update_db;
 
-    $self->schema( Schema->connect("dbi:SQLite:dbname=$db_file") );
+    $self->schema( BackPAN::Index::Schema->connect("dbi:SQLite:dbname=$db_file") );
     $self->_setup_database;
 
     $should_update_db = 1 if $self->_database_is_empty;
