@@ -18,8 +18,8 @@ sub new {
     my $options = shift;
 
     # Translate from PBP options to BackPAN::Index
-    $options{update} = 1 if $options{no_cache};
-    $options{releases_only_from_authors} = $options{only_authors};
+    $options->{update}                     = 1 if $options->{no_cache};
+    $options->{releases_only_from_authors} = $options->{only_authors};
 
     my $backpan = BackPAN::Index->new($options);
     return $class->SUPER::new({ _delegate => $backpan });
