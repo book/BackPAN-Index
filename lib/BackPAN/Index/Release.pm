@@ -84,6 +84,12 @@ Returns the name of the distribution this release belongs to.
 
 Returns the name of the distribution, hyphen, and version.
 
+=head2 file
+
+    my $file = $release->file;
+
+Returns the BackPAN::Index::File representing this release.
+
 =head2 filename
 
     my $filename = $release->filename;
