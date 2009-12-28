@@ -115,23 +115,40 @@ sub _update_database {
     # Get it out of the hot loop.
     my $only_authors = $self->releases_only_from_authors;
 
+    my $insert_file_sth = $dbh->prepare(q[
+        INSERT INTO files
+               (path, date, size)
+        VALUES (?,      ?,    ?   )
+    ]);
+
+    my $insert_release_sth = $dbh->prepare(q[
+        INSERT INTO releases
+               (file, dist, version, maturity, cpanid, distvname)
+        VALUES (?,    ?,    ?,       ?,        ?,      ?        )
+    ]);
+
+    my %files;
     open my $fh, $self->_backpan_index_file;
     while( my $line = <$fh> ) {
         chomp $line;
-        my ( $path, $date, $size ) = split ' ', $line;
+        my ( $path, $date, $size, @junk ) = split ' ', $line;
+
+        if( $files{$path}++ ) {
+            $self->_log("Duplicate file $path in index, ignoring");
+            next;
+        }
+
+        if( !defined $path or !defined $date or !defined $size or @junk ) {
+            $self->_log("Bad data read at line $.: $line");
+            next;
+        }
 
         next unless $size;
         next if $only_authors and $path !~ m{^authors/};
 
-        $dbh->do(q[
-            REPLACE INTO files
-                   (path, date, size)
-            VALUES (?,      ?,    ?   )
-        ], undef, $path, $date, $size);
+        $insert_file_sth->execute($path, $date, $size);
 
         next if $path =~ /\.(readme|meta)$/;
-
-        my $file_id = $dbh->last_insert_id("", "", "files", "");
 
         my $i = CPAN::DistnameInfo->new( $path );
 
@@ -141,11 +158,7 @@ sub _update_database {
         # this is arguably a bug in CPAN::DistnameInfo.
         $dist =~ s{\.pm$}{}i;
 
-        $dbh->do(q{
-            REPLACE INTO releases
-                   (file, dist, version, maturity, cpanid, distvname)
-            VALUES (?,    ?,    ?,       ?,        ?,      ?        )
-            }, undef,
+        $insert_release_sth->execute(
             $path,
             $dist,
             $i->version || '',
@@ -178,7 +191,7 @@ sub _setup_database {
     my %create_for = (
         files           => <<'SQL',
 CREATE TABLE IF NOT EXISTS files (
-    path      TEXT            PRIMARY KEY,
+    path        TEXT            PRIMARY KEY,
     date        INTEGER         NOT NULL,
     size        INTEGER         NOT NULL CHECK ( size >= 0 )
 )
