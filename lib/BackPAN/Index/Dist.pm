@@ -20,15 +20,30 @@ __END__
 
 BackPAN::Index::Dist - Representing a distribution on BackPAN
 
+=head1 SYNOPSIS
+
+Use through BackPAN::Index.
+
 =head1 DESCRIPTION
 
+An object representing a distribution on BackPAN.  A distribution is
+made up of releases.
+
 =head2 releases
+
+    my $releases = $dist->releases;
 
 A ResultSet of this distribution's releases.
 
 =head2 name
 
+    my $dist_name = $dist->name;
+
 Name of the distribution.
+
+=head1 SEE ALSO
+
+L<BackPAN::Index>
 
 =cut
 
