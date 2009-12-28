@@ -31,16 +31,18 @@ BackPAN::Index::Release - A single release of a distribution
 =head1 SYNOPSIS
 
   my $b = BackPAN::Index->new();
-  my @acme_colours = $b->dists("Acme-Colour");
 
-  print "   CPANID: " . $acme_colours[0]->cpanid . "\n";
-  print "     Date: " . $acme_colours[0]->date . "\n";
-  print "     Dist: " . $acme_colours[0]->dist . "\n";
-  print "Distvname: " . $acme_colours[0]->distvname . "\n";
-  print " Filename: " . $acme_colours[0]->filename . "\n";
-  print " Maturity: " . $acme_colours[0]->maturity . "\n";
-  print "   Prefix: " . $acme_colours[0]->prefix . "\n";
-  print "  Version: " . $acme_colours[0]->version . "\n";
+  # Find version 1.2.3 of Acme-Colour
+  my $release = $b->release("Acme-Colour", '1.2.3');
+
+  print "   CPANID: " . $release->cpanid . "\n";
+  print "     Date: " . $release->date . "\n";
+  print "     Dist: " . $release->dist . "\n";
+  print "Distvname: " . $release->distvname . "\n";
+  print " Filename: " . $release->filename . "\n";
+  print " Maturity: " . $release->maturity . "\n";
+  print "   Prefix: " . $release->prefix . "\n";
+  print "  Version: " . $release->version . "\n";
 
 =head1 DESCRIPTION
 
@@ -54,67 +56,65 @@ distribution.
 
 =head2 cpanid
 
-The cpanid method returns the PAUSE ID of the author of the release.
+    my $cpanid = $release->cpanid;
 
-  print "   CPANID: " . $acme_colours[0]->cpanid . "\n";
+Returns the PAUSE ID of the author of the release.
 
 =head2 date
 
-The date method returns the date of the release, in UNIX epoch
-seconds:
+    my $date = $release->date;
 
-  print "     Date: " . $acme_colours[0]->date . "\n";
+Returns the date of the release, in UNIX epoch seconds.
 
 =head2 dist
 
-The dist method returns the name of the distribution:
+    my $dist_name = $release->dist;
 
-  print "     Dist: " . $acme_colours[0]->dist . "\n";
+Returns the name of the distribution this release belongs to.
 
 =head2 distvname
 
-The distvname method returns the name of the distribution, hyphen, and
-the version:
+    my $distvname = $release->distvname;
 
-  print "Distvname: " . $acme_colours[0]->distvname . "\n";
+Returns the name of the distribution, hyphen, and version.
 
 =head2 filename
 
-The filename method returns the filename of the release:
+    my $filename = $release->filename;
 
-  print " Filename: " . $acme_colours[0]->filename . "\n";
+Returns the filename of the release, just the file part.
 
 =head2 maturity
 
-The maturity method returns the maturity of the release:
+    my $maturity = $release->maturity;
 
-  print " Maturity: " . $acme_colours[0]->maturity . "\n";
+Returns the maturity of the release.
 
 =head2 prefix
 
-The prefix method returns the prefix of the release:
+    my $prefix = $release->prefix;
 
-  print "   Prefix: " . $acme_colours[0]->prefix . "\n";
+Returns the full path on CPAN to the release.
 
 =head2 version
 
-The version method returns the version of the release:
+    my $version = $release->version;
 
-  print "  Version: " . $acme_colours[0]->version . "\n";
+Returns the version of the release:
+
 
 =head1 AUTHOR
 
-Leon Brocard <acme@astray.com>
+Leon Brocard <acme@astray.com> and Michael G Schwern <schwern@pobox.com>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005, Leon Brocard
+Copyright (C) 2005-2009, Leon Brocard
 
 This module is free software; you can redistribute it or modify it under
 the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<BackPAN::Index>
-
+L<BackPAN::Index>, L<BackPAN::Index::Dist>, L<BackPAN::Index::File>
 
