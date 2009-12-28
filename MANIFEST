@@ -25,3 +25,6 @@ t/Parse-BACKPAN-Packages/simple.t
 t/pod.t
 t/pod_coverage.t
 t/stringify.t
+Makefile.PL
+META.yml
+LICENSE
