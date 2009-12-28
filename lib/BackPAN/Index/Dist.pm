@@ -7,6 +7,10 @@ use parent qw(DBIx::Class::Core);
 
 use CLASS;
 
+use overload
+  q[""]         => sub { $_[0]->name },
+  fallback      => 1;
+
 CLASS->table("distributions");
 CLASS->add_columns("name");
 CLASS->set_primary_key("name");

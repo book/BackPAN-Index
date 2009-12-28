@@ -5,6 +5,10 @@ use warnings;
 
 use File::Basename qw(basename);
 
+use overload
+  q[""]         => sub { $_[0]->path },
+  fallback      => 1;
+
 sub url {
     my $self = shift;
     return "http://backpan.cpan.org/" . $self->path;

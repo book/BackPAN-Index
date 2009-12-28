@@ -3,6 +3,10 @@ package BackPAN::Index::Release;
 use strict;
 use warnings;
 
+use overload
+  q[""]         => sub { $_[0]->distvname },
+  fallback      => 1;
+
 sub date {
     my $self = shift;
     return $self->file->date;
