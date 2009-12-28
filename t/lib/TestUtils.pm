@@ -37,18 +37,24 @@ sub backpan_index_url {
 
 # Init a new BackPAN::Index object with the right options for testing
 sub new_backpan {
+    my %args = @_;
+    $args{backpan_index_url} = backpan_index_url() if $args{update};
+
     return BackPAN::Index->new({
         cache_dir               => cache_dir(),
-        backpan_index_url       => backpan_index_url(),
+        update                  => 0,
         @_
     });
 }
 
 sub new_pbp {
+    my %args = @_;
+    $args{backpan_index_url} = backpan_index_url() if $args{update};
+
     require Parse::BACKPAN::Packages;
     return Parse::BACKPAN::Packages->new({
         cache_dir               => cache_dir(),
-        backpan_index_url       => backpan_index_url(),
+        update                  => 0,
         @_
     });
 }
