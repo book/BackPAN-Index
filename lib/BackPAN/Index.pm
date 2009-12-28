@@ -17,8 +17,9 @@ use aliased 'BackPAN::Index::Schema';
 use parent qw( Class::Accessor::Fast );
 
 __PACKAGE__->mk_accessors(qw(
-    no_cache cache_dir backpan_index_url backpan_index only_authors
-    schema cache debug
+    no_cache cache_dir backpan_index_url only_authors debug
+
+    backpan_index schema cache 
 ));
 
 my %Defaults = (
