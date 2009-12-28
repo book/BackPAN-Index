@@ -38,6 +38,8 @@ sub new {
     my $class   = shift;
     my $options = shift;
 
+    $options ||= {};
+
     # Apply defaults
     %$options = ( %Defaults, %$options );
 
@@ -94,7 +96,7 @@ sub _update_database {
         $should_update_db = ($db_age > $cache->ttl);
 
         # No matter what, update the DB if we got a new index file.
-        my $archive_mtime = $self->_backpan_index_archive->stat->mtime;
+        my $archive_mtime = -e $self->_backpan_index_archive ? $self->_backpan_index_archive->stat->mtime : 0;
         $should_update_db = 1 if $db_mtime < $archive_mtime;
     }
 
