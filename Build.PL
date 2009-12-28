@@ -2,9 +2,12 @@ use Module::Build;
 use strict;
 
 my $build = Module::Build->new(
-  create_makefile_pl => 'traditional',
   license            => 'perl',
   module_name        => 'BackPAN::Index',
+  dist_author        => [
+      'Leon Brocard <acme@astray.com>',
+      'Michael G Schwern <schwern@pobox.com>',
+  ],
 
   requires           => {
     'App::Cache'            => '0',
@@ -19,7 +22,7 @@ my $build = Module::Build->new(
     'Path::Class'           => '0.17',
     autodie                 => '0',
     parent                  => '0',
-    perl                    => '5.8.1',
+    perl                    => '5.008001',
   },
 
   build_requires     => {
@@ -27,11 +30,17 @@ my $build = Module::Build->new(
     'Test::Compile'         => '0.11',
   },
 
-  resources             => {
-      bugtracker        => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages',
-      repository        => 'http://github.com/acme/parse-backpan-packages',
+  recursive_test_files  => 1,
+
+  meta_merge => {
+      resources             => {
+          bugtracker        => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages',
+          repository        => 'http://github.com/acme/parse-backpan-packages',
+      },
   },
 
-  recursive_test_files  => 1,
+  create_license        => 1,
+  create_makefile_pl    => 'traditional',
+  create_readme         => 1,
 );
 $build->create_build_script;
