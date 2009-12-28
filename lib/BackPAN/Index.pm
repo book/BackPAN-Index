@@ -560,11 +560,26 @@ it to do things.  Here's some examples.
     my @releases = $backpan->dist("Moose")->releases
                                           ->search(undef, { order_by => "version" });
 
+=head1 AUTHOR
+
+Michael G Schwern <schwern@pobox.com>
+
+=head1 COPYRIGHT
+
+Copyright 2009, Michael G Schwern
+
+=head1 LICENSE
+
+This module is free software; you can redistribute it or modify it under
+the same terms as Perl itself.
 
 =head1 SEE ALSO
 
 L<DBIx::Class::ResultSet>, L<BackPAN::Index::File>,
 L<BackPAN::Index::Release>, L<BackPAN::Index::Dist>
+
+Repository:  L<http://github.com/acme/parse-backpan-packages>
+Bugs:        L<http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages>
 
 =cut
 
