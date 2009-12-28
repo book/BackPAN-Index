@@ -17,6 +17,12 @@ sub data_methods {
     return qw(name);
 }
 
+sub authors {
+    my $self = shift;
+
+    return $self->releases->search(undef, { distinct => 1 })->get_column("cpanid")->all;
+}
+
 
 CLASS->table("distributions");
 CLASS->add_columns("name");
@@ -51,6 +57,12 @@ A ResultSet of this distribution's releases.
     my $dist_name = $dist->name;
 
 Name of the distribution.
+
+=head2 authors
+
+    my @authors = $dist->authors;
+
+Return the CPANIDs which made releases of this $dist, in no particular order.
 
 =head2 as_hash
 
