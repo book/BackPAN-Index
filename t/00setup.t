@@ -10,6 +10,9 @@ use_ok("BackPAN::Index");
 
 use TestUtils;
 
+# There might be junk in it.
+TestUtils::clear_cache();
+
 # Populate the cache
 diag("Fetching the BackPAN index and creating the database. This may take a while.");
 my $p = new_backpan( update => 1 );
