@@ -11,7 +11,7 @@ use TestUtils;
 my $p = new_backpan();
 
 my $dists = $p->dists;
-cmp_ok $dists->count, '>=', 21911;
+cmp_ok $dists->count, '>=', 20_000;
 
 ok $p->dist("Acme-Pony");
 
