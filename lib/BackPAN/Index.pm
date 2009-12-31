@@ -269,7 +269,8 @@ sub _get_backpan_index {
     die "Error fetching $url: $status" unless is_success($status);
 
     my $ae = Archive::Extract->new( archive => $self->_backpan_index_archive );
-    $ae->extract( to => $self->_backpan_index_file );
+    $ae->extract( to => $self->_backpan_index_file )
+      or die "Problem extracting @{[ $self->_backpan_index_archive ]}: @{[ $ae->error ]}";
 
     # If the backpan index age is older than the TTL this prevents us
     # from immediately looking again.
