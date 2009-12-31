@@ -31,6 +31,7 @@ my $remote_index = "http://www.astray.com/tmp/backpan.txt.gz";
 my $local_index  = URI::file->new( File::Spec::Unix->rel2abs("t/backpan.txt.gz") );
 sub backpan_index_url {
     use LWP::Simple;
+    return $local_index if $ENV{BACKPAN_INDEX_TEST_NO_INTERNET};
     return head($remote_index) ? $remote_index : $local_index;
 }
 
@@ -43,7 +44,7 @@ sub new_backpan {
     return BackPAN::Index->new({
         cache_dir               => cache_dir(),
         update                  => 0,
-        @_
+        %args
     });
 }
 
@@ -55,7 +56,7 @@ sub new_pbp {
     return Parse::BACKPAN::Packages->new({
         cache_dir               => cache_dir(),
         update                  => 0,
-        @_
+        %args
     });
 }
 
