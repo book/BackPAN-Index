@@ -1,4 +1,17 @@
-Revision history for Perl module Parse::BACKPAN::Packages:
+Revision history for Perl module BackPAN::Index
+
+0.38
+  - Added dists_changed_since() and releases_since()
+  - More information added to Dists
+  - Fixed missing App::Cache version requirement
+
+0.37_01
+  - Rewritten to use SQLite and DBIx::Class
+  - Faster initialization
+  - Faster database creation
+  - More flexible
+  - BackPAN::Index added
+  - Parse::BACKPAN::Packages deprecated
 
 0.36 Mon Nov 16 08:48:45 GMT 2009
   - add no_cache option (patch by Adriano Ferreira)
