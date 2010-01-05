@@ -10,7 +10,7 @@ my $build = Module::Build->new(
   ],
 
   requires           => {
-    'App::Cache'            => '0',
+    'App::Cache'            => '0.37',
     'CPAN::DistnameInfo'    => '0.09',
     'Class::Accessor::Fast' => '0',
     CLASS                   => '1.00',
