@@ -552,6 +552,22 @@ sub dists_by {
     return $self->dists->search({ "releases.cpanid" => $cpanid }, { join => "releases", distinct => 1 });
 }
 
+
+=head2 dists_changed_since
+
+    my $dists = $backpan->dists_changed_since($time);
+
+Returns a ResultSet of distributions which have had releases at or after after $time.
+
+=cut
+
+sub dists_changed_since {
+    my $self = shift;
+    my $time = shift;
+
+    return $self->dists->search( latest_date => \">= $time" );
+}
+
 =head2 releases
 
     my $all_releases  = $backpan->releases();
@@ -584,6 +600,23 @@ sub releases_by {
 
     return $self->releases->search({ cpanid => $cpanid });
 }
+
+
+=head2 releases_since
+
+    my $releases = $backpan->releases_since($time);
+
+Returns a ResultSet of releases which were released at or after $time.
+
+=cut
+
+sub releases_since {
+    my $self = shift;
+    my $time = shift;
+
+    return $self->releases->search( date => \">= $time" );
+}
+
 
 =head1 EXAMPLES
 
