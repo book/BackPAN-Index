@@ -313,7 +313,12 @@ sub _get_backpan_index {
     my $status = getstore($url, $self->_backpan_index_archive.'');
     die "Error fetching $url: $status" unless is_success($status);
 
+    # Faster
     local $Archive::Extract::PREFER_BIN = 1;
+
+    # Archive::Extract is vulnerable to the ORS.
+    local $\;
+
     my $ae = Archive::Extract->new( archive => $self->_backpan_index_archive );
     $ae->extract( to => $self->_backpan_index_file )
       or die "Problem extracting @{[ $self->_backpan_index_archive ]}: @{[ $ae->error ]}";
