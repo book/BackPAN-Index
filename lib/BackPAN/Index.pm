@@ -34,6 +34,7 @@ my %Defaults = (
     cache_ttl                   => 60 * 60,
 );
 
+
 sub new {
     my $class   = shift;
     my $options = shift;
@@ -125,10 +126,21 @@ sub _update_database {
 
     my $insert_release_sth = $dbh->prepare(q[
         INSERT INTO releases
-               (file, dist, version, date, maturity, cpanid, distvname)
-        VALUES (?,    ?,    ?,       ?,    ?,        ?,      ?        )
+               (path, dist, version, date, size, maturity, cpanid, distvname)
+        VALUES (?,    ?,    ?,       ?,    ?,    ?,        ?,      ?        )
     ]);
 
+    my $insert_dist_sth = $dbh->prepare(q[
+        INSERT INTO dists
+               (name, num_releases,
+                first_release,  first_date,  first_author,
+                latest_release, latest_date, latest_author)
+        VALUES (?,    ?,
+                ?,              ?,           ?,
+                ?,              ?,           ?)
+    ]);
+
+    my %dists;
     my %files;
     open my $fh, $self->_backpan_index_file;
     while( my $line = <$fh> ) {
@@ -162,18 +174,44 @@ sub _update_database {
             $dist,
             $i->version || '',
             $date,
+            $size,
             $i->maturity,
             $i->cpanid,
             $i->distvname,
         );
+
+
+        # Update aggregate data about dists
+        my $distdata = ($dists{$dist} ||= { name => $dist });
+
+        if( !defined $distdata->{first_release} ||
+            $date < $distdata->{first_date} )
+        {
+            $distdata->{first_release} = $path;
+            $distdata->{first_author}  = $i->cpanid;
+            $distdata->{first_date}    = $date;
+        }
+
+        if( !defined $distdata->{latest_release} ||
+            $date > $distdata->{latest_date} )
+        {
+            $distdata->{latest_release} = $path;
+            $distdata->{latest_author}  = $i->cpanid;
+            $distdata->{latest_date}    = $date;
+        }
+
+        $distdata->{num_releases}++;
     }
 
-    # A view is too slow
-    $dbh->do(q[
-        INSERT INTO dists
-            (name)
-            SELECT DISTINCT dist FROM releases
-    ]);
+    for my $dist (values %dists) {
+        $insert_dist_sth->execute(
+            @{$dist}
+              {qw(name num_releases
+                  first_release  first_date  first_author
+                  latest_release latest_date latest_author
+              )}
+        );
+    }
 
     # Add indexes after inserting so as not to slow down the inserts
     $self->_add_indexes;
@@ -195,6 +233,7 @@ sub _database_is_empty {
 }
 
 
+# This is denormalized for performance, its read-only anyway
 sub _setup_database {
     my $self = shift;
 
@@ -208,21 +247,27 @@ CREATE TABLE IF NOT EXISTS files (
 SQL
         releases        => <<'SQL',
 CREATE TABLE IF NOT EXISTS releases (
-    id          INTEGER         PRIMARY KEY,
-    file        INTEGER         NOT NULL REFERENCES files,
-    dist        TEXT            NOT NULL REFERENCES dists(name),
+    path        TEXT            PRIMARY KEY REFERENCES files,
+    dist        TEXT            NOT NULL REFERENCES dists,
     date        INTEGER         NOT NULL,
+    size        TEXT            NOT NULL,
     version     TEXT            NOT NULL,
     maturity    TEXT            NOT NULL,
-    cpanid      TEXT            NOT NULL,
-    -- Might be different than dist-version
-    distvname   TEXT            NOT NULL
+    distvname   TEXT            NOT NULL,
+    cpanid      TEXT            NOT NULL
 )
 SQL
 
         dists           => <<'SQL',
 CREATE TABLE IF NOT EXISTS dists (
-    name        TEXT            PRIMARY KEY
+    name                TEXT            PRIMARY KEY,
+    first_release       TEXT            NOT NULL REFERENCES releases,
+    latest_release      TEXT            NOT NULL REFERENCES releases,
+    first_date          INTEGER         NOT NULL,
+    latest_date         INTEGER         NOT NULL,
+    first_author        TEXT            NOT NULL,
+    latest_author       TEXT            NOT NULL,
+    num_releases        INTEGER         NOT NULL
 )
 SQL
 );
@@ -246,7 +291,7 @@ sub _add_indexes {
         "CREATE INDEX IF NOT EXISTS dists_by ON releases (cpanid, dist)",
 
         # Speed up files_by a lot
-        "CREATE INDEX IF NOT EXISTS files_by ON releases (cpanid, file)",
+        "CREATE INDEX IF NOT EXISTS files_by ON releases (cpanid, path)",
 
         # Let us order releases by date quickly
         "CREATE INDEX IF NOT EXISTS releases_by_date ON releases (date, dist)",
@@ -268,6 +313,7 @@ sub _get_backpan_index {
     my $status = getstore($url, $self->_backpan_index_archive.'');
     die "Error fetching $url: $status" unless is_success($status);
 
+    local $Archive::Extract::PREFER_BIN = 1;
     my $ae = Archive::Extract->new( archive => $self->_backpan_index_archive );
     $ae->extract( to => $self->_backpan_index_file )
       or die "Problem extracting @{[ $self->_backpan_index_archive ]}: @{[ $ae->error ]}";
@@ -555,7 +601,7 @@ it to do things.  Here's some examples.
     my @names = $backpan->dists->get_column("name")->all;
 
     # What path contains this release?
-    my $path = $backpan->release("Acme-Pony", 1.01)->file->path;
+    my $path = $backpan->release("Acme-Pony", 1.01)->path;
 
     # Get all the releases of Moose ordered by version
     my @releases = $backpan->dist("Moose")->releases

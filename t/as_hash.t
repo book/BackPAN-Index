@@ -14,9 +14,20 @@ my $b = new_backpan();
     my $dist = $b->dists->search(undef, { order_by => "random()", rows => 1 })->first;
     note("Dist is @{[$dist->name]}");
 
+    my $first_release  = $dist->releases->search( undef,
+                                                  { order_by => {-asc  => ['date']} })->first;
+    my $latest_release = $dist->releases->search( undef,
+                                                  { order_by => {-desc => ['date']} })->first;
     is_deeply $dist->as_hash, {
-        name    => $dist->name
-    };
+        name            => $dist->name,
+        first_release   => $first_release,
+        first_date      => $first_release->date,
+        first_author    => $first_release->cpanid,
+        latest_release  => $latest_release,
+        latest_date     => $latest_release->date,
+        latest_author   => $latest_release->cpanid,
+        num_releases    => $dist->releases->count,
+    } or diag explain $dist->as_hash;
 
     my $release = $dist->releases->search(undef, { order_by => "random()" })->first;
     note("Release is @{[$release->distvname]}");
@@ -32,8 +43,8 @@ my $b = new_backpan();
 
     is "$release", $release->distvname,  "Release stringifies to distvname";
 
-    my $file = $release->file;
-    note("File is @{[$release->path]}");
+    my $file = $release->path;
+    note("File is $file");
 
     is_deeply $file->as_hash, {
         path            => $file->path,

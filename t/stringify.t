@@ -22,8 +22,8 @@ my $b = new_backpan();
 
     is "$release", $release->distvname,  "Release stringifies to distvname";
 
-    my $file = $release->file;
-    note("File is @{[$release->path]}");
+    my $file = $release->path;
+    note("File is $file");
 
     is "$file", $file->path,            "File stringifies to path";
 }

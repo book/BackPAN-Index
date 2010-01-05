@@ -15,18 +15,13 @@ sub data_methods {
 
 sub filename {
     my $self = shift;
-    return $self->file->filename;
-}
-
-sub path {
-    my $self = shift;
-    return $self->file;
+    return $self->path->filename;
 }
 
 # Compatibility with PBP
 sub prefix {
     my $self = shift;
-    return $self->file;
+    return $self->path;
 }
 
 1;
@@ -87,12 +82,6 @@ Returns the name of the distribution this release belongs to.
 
 Returns the name of the distribution, hyphen, and version.
 
-=head2 file
-
-    my $file = $release->file;
-
-Returns the BackPAN::Index::File representing this release.
-
 =head2 filename
 
     my $filename = $release->filename;
@@ -109,7 +98,8 @@ Returns the maturity of the release.
 
     my $path = $release->path;
 
-Returns the full path on CPAN to the release.
+Returns the full path on CPAN to the release.  This is a
+L<BackPAN::File> object.
 
 =head2 version
 

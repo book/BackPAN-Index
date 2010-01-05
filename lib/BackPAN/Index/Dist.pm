@@ -11,7 +11,11 @@ use overload
   fallback      => 1;
 
 sub data_methods {
-    return qw(name);
+    return qw(
+        name num_releases
+        first_release  first_date  first_author
+        latest_release latest_date latest_author
+    );
 }
 
 sub authors {
@@ -54,6 +58,36 @@ Name of the distribution.
     my @authors = $dist->authors;
 
 Return the CPANIDs which made releases of this $dist, in no particular order.
+
+=head2 num_releases
+
+    my $num_releases = $dist->num_releases;
+
+Returns the number of releases this distribution has.
+
+=head2 first_release
+
+=head2 latest_release
+
+    my $release = $dist->first_release;
+
+Returns the first or latest release of this distribution as a BackPAN::Index::Release.
+
+=head2 first_date
+
+=head2 latest_date
+
+    my $release = $dist->first_date;
+
+Returns the date of the first or latest release of this distribution.
+
+=head2 first_author
+
+=head2 latest_author
+
+    my $cpanid = $dist->first_author;
+
+Returns the CPANID of the author of the first or latest release.
 
 =head2 as_hash
 
