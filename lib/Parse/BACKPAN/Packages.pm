@@ -3,7 +3,7 @@ package Parse::BACKPAN::Packages;
 use strict;
 use warnings;
 
-our $VERSION = '0.37_01';
+our $VERSION = '0.37_02';
 
 use parent qw(Class::Accessor::Fast);
 

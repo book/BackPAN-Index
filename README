@@ -115,6 +115,12 @@ METHODS
 
     Returns either a ResultSet or a list of the Dists.
 
+  dists_changed_since
+        my $dists = $backpan->dists_changed_since($time);
+
+    Returns a ResultSet of distributions which have had releases at or after
+    after $time.
+
   releases
         my $all_releases  = $backpan->releases();
         my $dist_releases = $backpan->releases($dist_name);
@@ -137,6 +143,11 @@ METHODS
     Returns either a list of Releases or a ResultSet representing those
     releases.
 
+  releases_since
+        my $releases = $backpan->releases_since($time);
+
+    Returns a ResultSet of releases which were released at or after $time.
+
 EXAMPLES
     The real power of BackPAN::Index comes from DBIx::Class::ResultSet. Its
     very flexible and very powerful but not always obvious how to get it to
@@ -152,7 +163,7 @@ EXAMPLES
         my @names = $backpan->dists->get_column("name")->all;
 
         # What path contains this release?
-        my $path = $backpan->release("Acme-Pony", 1.01)->file->path;
+        my $path = $backpan->release("Acme-Pony", 1.01)->path;
 
         # Get all the releases of Moose ordered by version
         my @releases = $backpan->dist("Moose")->releases

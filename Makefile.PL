@@ -15,7 +15,7 @@ WriteMakefile
                            'parent' => '0',
                            'CLASS' => '1.00',
                            'DBD::SQLite' => '1.25',
-                           'App::Cache' => '0',
+                           'App::Cache' => '0.37',
                            'Class::Accessor::Fast' => '0',
                            'CPAN::DistnameInfo' => '0.09',
                            'Test::More' => '0.90',
