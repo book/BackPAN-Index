@@ -17,7 +17,7 @@ name: BackPAN-Index
 provides:
   BackPAN::Index:
     file: lib/BackPAN/Index.pm
-    version: 0.37_02
+    version: 0.38
   BackPAN::Index::Dist:
     file: lib/BackPAN/Index/Dist.pm
   BackPAN::Index::File:
@@ -30,7 +30,7 @@ provides:
     file: lib/BackPAN/Index/Schema.pm
   Parse::BACKPAN::Packages:
     file: lib/Parse/BACKPAN/Packages.pm
-    version: 0.37_02
+    version: 0.38
 requires:
   App::Cache: 0.37
   Archive::Extract: 0
@@ -49,4 +49,4 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages
   license: http://dev.perl.org/licenses/
   repository: http://github.com/acme/parse-backpan-packages
-version: 0.37_02
+version: 0.38

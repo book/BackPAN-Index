@@ -1,5 +1,8 @@
 Revision history for Perl module BackPAN::Index
 
+0.38  Tue Feb 23 20:27:17 PST 2010
+  Stable release, unaltered from 0.37_02.
+
 0.37_02 Wed Jan  6 18:37:06 PST 2010
   - Added dists_changed_since() and releases_since()
   - More information added to Dists
