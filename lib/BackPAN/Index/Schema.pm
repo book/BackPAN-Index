@@ -17,6 +17,7 @@ CLASS->loader_options(
     },
     result_namespace => '+BackPAN::Index',
     use_namespaces => 1,
+    naming         => 'current',
 );
 
 
