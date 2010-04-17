@@ -9,8 +9,11 @@ lib/BackPAN/Index/Release.pm
 lib/BackPAN/Index/Role/AsHash.pm
 lib/BackPAN/Index/Schema.pm
 lib/Parse/BACKPAN/Packages.pm
+LICENSE
+Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.yml
 README
 t/00compile.t
 t/00setup.t
@@ -25,6 +28,3 @@ t/Parse-BACKPAN-Packages/simple.t
 t/pod.t
 t/pod_coverage.t
 t/stringify.t
-Makefile.PL
-META.yml
-LICENSE

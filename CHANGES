@@ -1,6 +1,6 @@
 Revision history for Perl module BackPAN::Index
 
-0.38_01
+0.39  Sat Apr 17 20:17:47 EEST 2010
   Fixes
   * Made compatible with DBIx::Class::Schema::Loader 0.05
 
