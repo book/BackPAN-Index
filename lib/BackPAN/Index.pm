@@ -240,14 +240,14 @@ sub _setup_database {
     my %create_for = (
         files           => <<'SQL',
 CREATE TABLE IF NOT EXISTS files (
-    path        TEXT            PRIMARY KEY,
+    path        TEXT            NOT NULL PRIMARY KEY,
     date        INTEGER         NOT NULL,
     size        INTEGER         NOT NULL CHECK ( size >= 0 )
 )
 SQL
         releases        => <<'SQL',
 CREATE TABLE IF NOT EXISTS releases (
-    path        TEXT            PRIMARY KEY REFERENCES files,
+    path        TEXT            NOT NULL PRIMARY KEY REFERENCES files,
     dist        TEXT            NOT NULL REFERENCES dists,
     date        INTEGER         NOT NULL,
     size        TEXT            NOT NULL,
@@ -260,7 +260,7 @@ SQL
 
         dists           => <<'SQL',
 CREATE TABLE IF NOT EXISTS dists (
-    name                TEXT            PRIMARY KEY,
+    name                TEXT            NOT NULL PRIMARY KEY,
     first_release       TEXT            NOT NULL REFERENCES releases,
     latest_release      TEXT            NOT NULL REFERENCES releases,
     first_date          INTEGER         NOT NULL,

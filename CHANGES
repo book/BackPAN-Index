@@ -1,5 +1,11 @@
 Revision history for Perl module BackPAN::Index
 
+0.40
+  Fixes
+  * Make all the primary keys not null to quiet a new DBIx::Class
+    warning (and its a good idea).
+
+
 0.39  Sat Apr 17 20:17:47 EEST 2010
   Fixes
   * Made compatible with DBIx::Class::Schema::Loader 0.05
