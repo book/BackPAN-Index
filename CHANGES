@@ -2,6 +2,7 @@ Revision history for Perl module BackPAN::Index
 
 0.40
   Fixes
+  * Using the BackPAN index from gitpan.integra.net which is kept up to date.
   * Make all the primary keys not null to quiet a new DBIx::Class
     warning (and its a good idea).
 

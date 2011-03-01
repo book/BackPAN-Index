@@ -28,7 +28,7 @@ __PACKAGE__->mk_accessors(qw(
 ));
 
 my %Defaults = (
-    backpan_index_url           => "http://www.astray.com/tmp/backpan.txt.gz",
+    backpan_index_url           => "http://gitpan.integra.net/backpan-index.gz",
     releases_only_from_authors  => 1,
     debug                       => 0,
     cache_ttl                   => 60 * 60,
