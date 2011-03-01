@@ -3,7 +3,7 @@ package BackPAN::Index;
 use strict;
 use warnings;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 use autodie;
 use App::Cache 0.37;

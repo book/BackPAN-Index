@@ -7,8 +7,9 @@ build_requires:
   Test::Compile: 0.11
   Test::More: 0.90
 configure_requires:
-  Module::Build: 0.36
-generated_by: 'Module::Build version 0.3607'
+  Module::Build: 0.37
+dynamic_config: 1
+generated_by: 'Module::Build version 0.3705, CPAN::Meta::Converter version 2.110440'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -17,20 +18,25 @@ name: BackPAN-Index
 provides:
   BackPAN::Index:
     file: lib/BackPAN/Index.pm
-    version: 0.39
+    version: 0.40
   BackPAN::Index::Dist:
     file: lib/BackPAN/Index/Dist.pm
+    version: 0
   BackPAN::Index::File:
     file: lib/BackPAN/Index/File.pm
+    version: 0
   BackPAN::Index::Release:
     file: lib/BackPAN/Index/Release.pm
+    version: 0
   BackPAN::Index::Role::AsHash:
     file: lib/BackPAN/Index/Role/AsHash.pm
+    version: 0
   BackPAN::Index::Schema:
     file: lib/BackPAN/Index/Schema.pm
+    version: 0
   Parse::BACKPAN::Packages:
     file: lib/Parse/BACKPAN/Packages.pm
-    version: 0.39
+    version: 0.40
 requires:
   App::Cache: 0.37
   Archive::Extract: 0
@@ -49,4 +55,4 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages
   license: http://dev.perl.org/licenses/
   repository: http://github.com/acme/parse-backpan-packages
-version: 0.39
+version: 0.40

@@ -43,7 +43,7 @@ METHODS
 
     new() takes some options
 
-    update
+   update
     Because it is rather large, BackPAN::Index caches a copy of the BackPAN
     index and builds a local database to speed access. This flag controls if
     the local index is updated.
@@ -54,31 +54,31 @@ METHODS
     It will always create a new index if one does not exist.
 
     By default the index is cached and checked for updates according to
-    `<$backpan-'cache_ttl>>.
+    "<$backpan-"cache_ttl>>.
 
-    cache_ttl
+   cache_ttl
     How many seconds before checking for an updated index.
 
     Defaults to an hour.
 
-    debug
+   debug
     If true, debug messages will be printed.
 
     Defaults to false.
 
-    releases_only_from_authors
-    If true, only files in the `authors' directory will be considered as
+   releases_only_from_authors
+    If true, only files in the "authors" directory will be considered as
     releases. If false any file in the index may be considered for a
     release.
 
     Defaults to true.
 
-    cache_dir
+   cache_dir
     Location of the cache directory.
 
     Defaults to whatever App::Cache does.
 
-    backpan_index_url
+   backpan_index_url
     URL to the BackPAN index.
 
     Defaults to a sensible location.
@@ -183,6 +183,7 @@ SEE ALSO
     DBIx::Class::ResultSet, BackPAN::Index::File, BackPAN::Index::Release,
     BackPAN::Index::Dist
 
-    Repository: http://github.com/acme/parse-backpan-packages Bugs:
-    http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages
+    Repository: <http://github.com/acme/parse-backpan-packages> Bugs:
+    <http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages
+    >
 

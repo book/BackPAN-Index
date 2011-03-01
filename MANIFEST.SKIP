@@ -54,3 +54,4 @@
 
 t/cache/
 ^MYMETA.yml$
+^MYMETA\.json$
