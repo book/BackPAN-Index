@@ -15,6 +15,7 @@ my $build = Module::Build->new(
     'Class::Accessor::Fast' => '0',
     CLASS                   => '1.00',
     'LWP::Simple'           => '0',
+    'URI'                   => '1.54',
     'Archive::Extract'      => '0',
     'DBIx::Class'           => '0.08109',
     'DBD::SQLite'           => '1.25',

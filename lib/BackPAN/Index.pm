@@ -335,6 +335,7 @@ sub _get_backpan_index {
 sub _backpan_index_archive {
     my $self = shift;
 
+    require URI;
     my $file = URI->new($self->backpan_index_url)->path;
     $file = Path::Class::file($file)->basename;
     return Path::Class::file($file)->absolute($self->cache->directory);
