@@ -13,7 +13,7 @@ is( $file->prefix, "authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz" );
 is( $file->date,   1014330111 );
 is( $file->size,   3031 );
 is( $file->url,
-    "http://backpan.cpan.org/authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz"
+    "http://backpan.perl.org/authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz"
 );
 
 my @acme_colours = $p->releases("Acme-Colour");

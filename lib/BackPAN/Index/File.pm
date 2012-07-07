@@ -3,6 +3,7 @@ package BackPAN::Index::File;
 use strict;
 use warnings;
 
+use URI;
 use File::Basename qw(basename);
 
 use overload
@@ -11,13 +12,19 @@ use overload
 
 use BackPAN::Index::Role::AsHash;
 
+sub backpan_root {
+    return URI->new("http://backpan.perl.org/");
+}
+
 sub data_methods {
     return qw(path date size);
 }
 
 sub url {
     my $self = shift;
-    return "http://backpan.cpan.org/" . $self->path;
+    my $url = $self->backpan_root;
+    $url->path($self->path);
+    return $url;
 }
 
 sub filename {

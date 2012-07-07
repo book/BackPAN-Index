@@ -369,6 +369,10 @@ sub _backpan_index_has_changed {
     return $remote_mod_time > $local_mod_time;
 }
 
+sub file {
+    my($self, $path) = @_;
+    return $self->files->single({ path => $path });
+}
 
 sub files {
     my $self = shift;

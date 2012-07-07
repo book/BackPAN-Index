@@ -1,5 +1,14 @@
 Revision history for Perl module BackPAN::Index
 
+0.41
+  Changes
+  * Changed the default backpan URL for fetching files to http://backpan.perl.org
+    rather than the backpan.cpan.org redirect. [rt.cpan.org 68492]
+
+  Bug Fixes
+  * BackPAN::Index now has a file() method, as documented in BackPAN::Index::File.
+
+
 0.40  Tue, 01 Mar 2011 11:57:38 +1100
   Fixes
   * Using the BackPAN index from gitpan.integra.net which is kept up to date.
