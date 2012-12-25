@@ -260,12 +260,10 @@ sub _database_is_empty {
 }
 
 
-
 sub _setup_database {
     my $self = shift;
 
-    require BackPAN::Index::Schema::Create;
-    BackPAN::Index::Schema::Create->new->create_tables($self->_dbh);
+    $self->db->create_tables($self->_dbh);
     $self->schema->rescan;
 
     return;
