@@ -10,4 +10,4 @@ cover_db/
 nytprof*
 *.patch
 t/cache/
-MYMETA.yml
+MYMETA.*
