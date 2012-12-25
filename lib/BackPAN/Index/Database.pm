@@ -89,11 +89,13 @@ has create_indexes_sql =>
 
 sub create_tables {
     my $self = shift;
-    my $dbh  = shift;
 
+    my $dbh = $self->dbh;
     for my $sql (values %{$self->create_tables_sql}) {
         $dbh->do($sql);
     }
+
+    $self->schema->rescan;
 
     return;
 }
@@ -101,8 +103,8 @@ sub create_tables {
 
 sub create_indexes {
     my $self = shift;
-    my $dbh  = shift;
 
+    my $dbh = $self->dbh;
     for my $sql (@{$self->create_indexes_sql}) {
         $dbh->do($sql);
     }
@@ -110,6 +112,11 @@ sub create_indexes {
     return;
 }
 
+
+sub dbh {
+    my $self = shift;
+    return $self->schema->storage->dbh;
+}
 
 sub db_file_exists {
     my $self = shift;

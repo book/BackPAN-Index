@@ -95,11 +95,6 @@ sub BUILD {
     return $self;
 }
 
-sub _dbh {
-    my $self = shift;
-    return $self->schema->storage->dbh;
-}
-
 sub _update_database {
     my $self = shift;
 
@@ -114,7 +109,7 @@ sub _update_database {
     my $db_file = $self->db->db_file;
     unlink $db_file if -e $db_file and $should_update_db;
 
-    $self->_setup_database;
+    $self->db->create_tables;
 
     $should_update_db = 1 if $self->_database_is_empty;
 
@@ -132,7 +127,7 @@ sub _index_archive_newer_than_db {
 sub _populate_database {
     my $self = shift;
 
-    my $dbh = $self->_dbh;
+    my $dbh = $self->db->dbh;
 
     $self->_log("Populating database...");
     $dbh->begin_work;
@@ -236,7 +231,7 @@ sub _populate_database {
     }
 
     # Add indexes after inserting so as not to slow down the inserts
-    $self->db->create_indexes($self->_dbh);
+    $self->db->create_indexes;
 
     $dbh->commit;
 
@@ -252,16 +247,6 @@ sub _database_is_empty {
     return 1 unless $self->files->count;
     return 1 unless $self->releases->count;
     return 0;
-}
-
-
-sub _setup_database {
-    my $self = shift;
-
-    $self->db->create_tables($self->_dbh);
-    $self->schema->rescan;
-
-    return;
 }
 
 

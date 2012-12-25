@@ -84,7 +84,7 @@ sub distributions_by {
     my ( $self, $author ) = @_;
     return unless $author;
 
-    my $dists = $self->_dbh->selectcol_arrayref(q[
+    my $dists = $self->db->dbh->selectcol_arrayref(q[
              SELECT DISTINCT dist
              FROM   releases
              WHERE  cpanid = ?
@@ -100,7 +100,7 @@ sub distributions_by {
 sub authors {
     my $self     = shift;
 
-    my $authors = $self->_dbh->selectcol_arrayref(q[
+    my $authors = $self->db->dbh->selectcol_arrayref(q[
         SELECT DISTINCT cpanid
         FROM     releases
         ORDER BY cpanid
@@ -112,7 +112,7 @@ sub authors {
 sub size {
     my $self = shift;
 
-    my $size = $self->_dbh->selectcol_arrayref(q[
+    my $size = $self->db->dbh->selectcol_arrayref(q[
         SELECT SUM(size) FROM files
     ]);
 
