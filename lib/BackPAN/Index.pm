@@ -366,7 +366,7 @@ sub _backpan_index_has_changed {
     $self->_backpan_index_file->touch;
 
     my(undef, undef, $remote_mod_time) = head($self->backpan_index_url);
-    return $remote_mod_time > $local_mod_time;
+    return ($remote_mod_time || 0) > $local_mod_time;
 }
 
 sub file {
