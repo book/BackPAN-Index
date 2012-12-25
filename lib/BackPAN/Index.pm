@@ -7,7 +7,6 @@ our $VERSION = '0.40';
 
 use autodie;
 use CPAN::DistnameInfo 0.09;
-use LWP::Simple qw(getstore head is_success);
 use Archive::Extract;
 use Path::Class ();
 use File::stat;
@@ -36,6 +35,20 @@ has backpan_index_url =>
   is		=> 'ro',
   isa		=> 'Str',
   default	=> "http://gitpan.integra.net/backpan-index.gz";
+
+has backpan_index =>
+  is		=> 'ro',
+  isa		=> 'BackPAN::Index::IndexFile',
+  lazy		=> 1,
+  default	=> sub {
+      my $self = shift;
+
+      require BackPAN::Index::IndexFile;
+      return BackPAN::Index::IndexFile->new(
+	  cache 	=> $self->cache,
+	  index_url	=> $self->backpan_index_url
+      );
+  };
 
 has cache_dir =>
   is		=> 'ro',
@@ -95,9 +108,7 @@ sub _update_database {
     my $self = shift;
 
     # Delay loading it into memory until we need it
-    $self->_log("Fetching BackPAN index...");
-    $self->_get_backpan_index;
-    $self->_log("Done.");
+    $self->backpan_index->get_index if $self->backpan_index->should_index_be_updated;
 
     my $should_update_db =
       $self->update 				||
@@ -120,10 +131,8 @@ sub _update_database {
 sub _index_archive_newer_than_db {
     my $self = shift;
 
-    my $archive_mtime = -e $self->_backpan_index_archive ? $self->_backpan_index_archive->stat->mtime : 0;
-    return $self->db->db_mtime < $archive_mtime;
+    return $self->db->db_mtime < $self->backpan_index->index_archive_mtime;
 }
-
 
 sub _populate_database {
     my $self = shift;
@@ -160,7 +169,7 @@ sub _populate_database {
 
     my %dists;
     my %files;
-    open my $fh, $self->_backpan_index_file;
+    open my $fh, $self->backpan_index->index_file;
     while( my $line = <$fh> ) {
         chomp $line;
         my ( $path, $date, $size, @junk ) = split ' ', $line;
@@ -282,72 +291,6 @@ sub _add_indexes {
     }
 }
 
-
-sub _get_backpan_index {
-    my $self = shift;
-    
-    my $url = $self->backpan_index_url;
-
-    return if !$self->_backpan_index_has_changed;
-
-    my $status = getstore($url, $self->_backpan_index_archive.'');
-    die "Error fetching $url: $status" unless is_success($status);
-
-    # Faster
-    local $Archive::Extract::PREFER_BIN = 1;
-
-    # Archive::Extract is vulnerable to the ORS.
-    local $\;
-
-    my $ae = Archive::Extract->new( archive => $self->_backpan_index_archive );
-    $ae->extract( to => $self->_backpan_index_file )
-      or die "Problem extracting @{[ $self->_backpan_index_archive ]}: @{[ $ae->error ]}";
-
-    # If the backpan index age is older than the TTL this prevents us
-    # from immediately looking again.
-    # XXX Should probably use a "last checked" semaphore file
-    $self->_backpan_index_file->touch;
-
-    return;
-}
-
-
-sub _backpan_index_archive {
-    my $self = shift;
-
-    require URI;
-    my $file = URI->new($self->backpan_index_url)->path;
-    $file = Path::Class::file($file)->basename;
-    return Path::Class::file($file)->absolute($self->cache->directory);
-}
-
-
-sub _backpan_index_file {
-    my $self = shift;
-
-    my $file = $self->_backpan_index_archive;
-    $file =~ s{\.[^.]+$}{};
-
-    return Path::Class::file($file);
-}
-
-
-sub _backpan_index_has_changed {
-    my $self = shift;
-
-    my $file = $self->_backpan_index_file;
-    return 1 unless -e $file;
-
-    my $local_mod_time = stat($file)->mtime;
-    my $local_age = time - $local_mod_time;
-    return 0 unless $local_age > $self->cache->ttl;
-
-    # We looked, don't have to look again until the ttl is up.
-    $self->_backpan_index_file->touch;
-
-    my(undef, undef, $remote_mod_time) = head($self->backpan_index_url);
-    return ($remote_mod_time || 0) > $local_mod_time;
-}
 
 sub file {
     my($self, $path) = @_;

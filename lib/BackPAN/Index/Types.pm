@@ -8,7 +8,15 @@ use Mouse::Util::TypeConstraints;
 class_type('App::Cache');
 class_type('BackPAN::Index');
 class_type('BackPAN::Index::Database');
+class_type('BackPAN::Index::IndexFile');
 class_type('DBIx::Class::Schema');
+
+coerce class_type("URI") =>
+  from 'Str',
+  via {
+      require URI;
+      URI->new($_)
+  };
 
 coerce class_type("Path::Class::File") =>
   from 'Str',
