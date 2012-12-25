@@ -35,7 +35,7 @@ my $build = Module::Build->new(
 
   meta_merge => {
       resources             => {
-          bugtracker        => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages',
+          bugtracker        => 'http://rt.cpan.org/Public/Dist/Display.html?Name=BackPAN-Index',
           repository        => 'http://github.com/acme/parse-backpan-packages',
       },
   },
