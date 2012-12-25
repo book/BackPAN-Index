@@ -1,4 +1,5 @@
-#!start included /usr/local/lib/perl5/5.10.1/ExtUtils/MANIFEST.SKIP
+
+#!start included /Users/schwern/perl5/perlbrew/perls/perl-5.16.2-threads/lib/5.16.2/ExtUtils/MANIFEST.SKIP
 # Avoid version control files.
 \bRCS\b
 \bCVS\b
@@ -48,10 +49,12 @@
 # Mac OSX SMB mount metadata files
 \B\._
 
-# Avoid Devel::Cover files.
+# Avoid Devel::Cover and Devel::CoverX::Covered files.
 \bcover_db\b
-#!end included /usr/local/lib/perl5/5.10.1/ExtUtils/MANIFEST.SKIP
+\bcovered\b
+
+# Avoid MYMETA files
+^MYMETA\.
+#!end included /Users/schwern/perl5/perlbrew/perls/perl-5.16.2-threads/lib/5.16.2/ExtUtils/MANIFEST.SKIP
 
 t/cache/
-^MYMETA.yml$
-^MYMETA\.json$
