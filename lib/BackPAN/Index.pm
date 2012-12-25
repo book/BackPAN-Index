@@ -14,37 +14,52 @@ use Path::Class ();
 use File::stat;
 use BackPAN::Index::Schema;
 
-use parent qw( Class::Accessor::Fast );
+use Mouse;
+use Mouse::Util::TypeConstraints qw(class_type);
 
-__PACKAGE__->mk_accessors(qw(
-    update
-    cache_ttl
-    debug
-    releases_only_from_authors
-    cache_dir
-    backpan_index_url
+has update =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default	=> 0;
 
-    backpan_index schema cache 
-));
+has cache_ttl =>
+  is		=> 'ro',
+  isa		=> 'Int',
+  default	=> 60 * 60;
 
-my %Defaults = (
-    backpan_index_url           => "http://gitpan.integra.net/backpan-index.gz",
-    releases_only_from_authors  => 1,
-    debug                       => 0,
-    cache_ttl                   => 60 * 60,
-);
+has debug =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default	=> 0;
+
+has releases_only_from_authors =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default	=> 1;
+
+has backpan_index_url =>
+  is		=> 'ro',
+  isa		=> 'Str',
+  default	=> "http://gitpan.integra.net/backpan-index.gz";
+
+has cache_dir =>
+  is		=> 'ro',
+  isa		=> 'Str'
+;
+
+has schema =>
+  is		=> 'rw',
+  isa		=> 'DBIx::Class::Schema'
+;
+
+has cache =>
+  is		=> 'rw',
+  isa		=> class_type('App::Cache'),
+;
 
 
-sub new {
-    my $class   = shift;
-    my $options = shift;
-
-    $options ||= {};
-
-    # Apply defaults
-    %$options = ( %Defaults, %$options );
-
-    my $self  = $class->SUPER::new($options);
+sub BUILD {
+    my $self = shift;
 
     my %cache_opts;
     $cache_opts{ttl}       = $self->cache_ttl;

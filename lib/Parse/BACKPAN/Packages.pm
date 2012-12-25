@@ -5,24 +5,36 @@ use warnings;
 
 our $VERSION = '0.40';
 
-use parent qw(Class::Accessor::Fast);
-
 use BackPAN::Index;
+use Mouse;
+use Mouse::Util::TypeConstraints qw(class_type);
 
-__PACKAGE__->mk_accessors(qw(
-    _delegate
-));
+has no_cache =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default 	=> 0;
 
-sub new {
-    my $class   = shift;
-    my $options = shift;
+has only_authors =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default	=> 1
+;
+
+has _delegate =>
+  is	=> 'rw',
+  isa	=> class_type('BackPAN::Index');
+
+sub BUILD {
+    my $self = shift;
 
     # Translate from PBP options to BackPAN::Index
-    $options->{update}                     = 1 if $options->{no_cache};
-    $options->{releases_only_from_authors} = $options->{only_authors};
+    my %options;
+    $options{update}                     = 1 if $self->no_cache;
+    $options{releases_only_from_authors} = 1 if $self->only_authors;
 
-    my $backpan = BackPAN::Index->new($options);
-    return $class->SUPER::new({ _delegate => $backpan });
+    $self->_delegate( BackPAN::Index->new(\%options) );
+
+    return;
 }
 
 our $AUTOLOAD;
