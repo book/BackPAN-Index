@@ -14,8 +14,19 @@ has db_file =>
   default	=> sub {
       my $self = shift;
       return Path::Class::File->new($self->cache->directory, "backpan.sqlite").'';
-  }
-;
+  };
+
+
+has schema =>
+  is		=> 'ro',
+  isa		=> 'DBIx::Class::Schema',
+  lazy		=> 1,
+  default	=> sub {
+      my $self = shift;
+
+      require BackPAN::Index::Schema;
+      return BackPAN::Index::Schema->connect("dbi:SQLite:dbname=@{[$self->db_file]}");
+  };
 
 # This is denormalized for performance, its read-only anyway
 has create_tables_sql =>

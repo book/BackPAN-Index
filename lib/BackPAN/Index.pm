@@ -55,11 +55,6 @@ has cache_dir =>
   isa		=> 'Str'
 ;
 
-has schema =>
-  is		=> 'rw',
-  isa		=> 'DBIx::Class::Schema'
-;
-
 has '+cache' =>
   is		=> 'rw',
   required	=> 0,
@@ -80,6 +75,7 @@ has '+cache' =>
 has db =>
   is		=> 'ro',
   isa		=> 'BackPAN::Index::Database',
+  handles	=> [qw(schema)],
   lazy		=> 1,
   default	=> sub {
       my $self = shift;
@@ -118,7 +114,6 @@ sub _update_database {
     my $db_file = $self->db->db_file;
     unlink $db_file if -e $db_file and $should_update_db;
 
-    $self->schema( BackPAN::Index::Schema->connect("dbi:SQLite:dbname=$db_file") );
     $self->_setup_database;
 
     $should_update_db = 1 if $self->_database_is_empty;
