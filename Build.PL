@@ -41,7 +41,6 @@ my $build = Module::Build->new(
   },
 
   create_license        => 1,
-  create_makefile_pl    => 'traditional',
   create_readme         => 1,
 );
 $build->create_build_script;
