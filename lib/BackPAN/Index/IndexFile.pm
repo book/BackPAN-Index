@@ -1,16 +1,10 @@
 package BackPAN::Index::IndexFile;
 
 use Mouse;
-with 'BackPAN::Index::Role::Log';
+with 'BackPAN::Index::Role::Log', 'BackPAN::Index::Role::HasCache';
 
 use LWP::Simple qw(getstore head is_success);
 use BackPAN::Index::Types;
-
-has cache =>
-  is		=> 'ro',
-  isa		=> 'App::Cache',
-  required 	=> 1
-;
 
 has index_url =>
   is		=> 'ro',

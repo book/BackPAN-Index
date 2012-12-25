@@ -1,14 +1,10 @@
 package BackPAN::Index::Database;
 
 use Mouse;
+with 'BackPAN::Index::Role::HasCache';
+
 use BackPAN::Index::Types;
 use Path::Class;
-
-has cache =>
-  is		=> 'ro',
-  isa		=> 'App::Cache',
-  required 	=> 1
-;
 
 has db_file =>
   is		=> 'ro',

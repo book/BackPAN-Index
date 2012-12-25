@@ -14,7 +14,7 @@ use BackPAN::Index::Schema;
 use BackPAN::Index::Types;
 
 use Mouse;
-with "BackPAN::Index::Role::Log";
+with 'BackPAN::Index::Role::Log', 'BackPAN::Index::Role::HasCache';
 
 has update =>
   is		=> 'ro',
@@ -60,9 +60,9 @@ has schema =>
   isa		=> 'DBIx::Class::Schema'
 ;
 
-has cache =>
+has '+cache' =>
   is		=> 'rw',
-  isa		=> 'App::Cache',
+  required	=> 0,
   lazy		=> 1,
   default	=> sub {
       my $self = shift;
