@@ -13,6 +13,7 @@ LICENSE
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.json
 META.yml
 README
 t/00compile.t
@@ -22,10 +23,10 @@ t/authors.t
 t/backpan.txt.gz
 t/cgi.t
 t/distributions.t
+t/file.t
 t/lib/TestUtils.pm
 t/only_authors.t
 t/Parse-BACKPAN-Packages/simple.t
 t/pod.t
 t/pod_coverage.t
 t/stringify.t
-META.json
