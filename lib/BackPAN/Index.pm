@@ -6,7 +6,6 @@ use warnings;
 our $VERSION = '0.40';
 
 use autodie;
-use App::Cache 0.37;
 use CPAN::DistnameInfo 0.09;
 use LWP::Simple qw(getstore head is_success);
 use Archive::Extract;
@@ -55,6 +54,18 @@ has schema =>
 has cache =>
   is		=> 'rw',
   isa		=> 'App::Cache',
+  lazy		=> 1,
+  default	=> sub {
+      my $self = shift;
+
+      my %cache_opts;
+      $cache_opts{ttl}       = $self->cache_ttl;
+      $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
+      $cache_opts{enabled}   = !$self->update;
+
+      require App::Cache;
+      return App::Cache->new( \%cache_opts );
+  }
 ;
 
 has db =>
@@ -73,14 +84,6 @@ has db =>
 
 sub BUILD {
     my $self = shift;
-
-    my %cache_opts;
-    $cache_opts{ttl}       = $self->cache_ttl;
-    $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
-    $cache_opts{enabled}   = !$self->update;
-
-    my $cache = App::Cache->new( \%cache_opts );
-    $self->cache($cache);
 
     $self->_update_database();
 
