@@ -241,7 +241,7 @@ sub _populate_database {
     }
 
     # Add indexes after inserting so as not to slow down the inserts
-    $self->_add_indexes;
+    $self->db->create_indexes($self->_dbh);
 
     $dbh->commit;
 
@@ -267,26 +267,6 @@ sub _setup_database {
     $self->schema->rescan;
 
     return;
-}
-
-
-sub _add_indexes {
-    my $self = shift;
-
-    my @indexes = (
-        # Speed up dists_by several orders of magnitude
-        "CREATE INDEX IF NOT EXISTS dists_by ON releases (cpanid, dist)",
-
-        # Speed up files_by a lot
-        "CREATE INDEX IF NOT EXISTS files_by ON releases (cpanid, path)",
-
-        # Let us order releases by date quickly
-        "CREATE INDEX IF NOT EXISTS releases_by_date ON releases (date, dist)",
-    );
-    my $dbh = $self->_dbh;
-    for my $sql (@indexes) {
-        $dbh->do($sql);
-    }
 }
 
 

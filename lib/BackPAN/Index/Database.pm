@@ -58,11 +58,41 @@ SQL
     }
   };
 
+
+has create_indexes_sql =>
+  is		=> 'ro',
+  isa		=> 'ArrayRef[Str]',
+  default	=> sub {
+      return [
+	  # Speed up dists_by several orders of magnitude
+	  "CREATE INDEX IF NOT EXISTS dists_by ON releases (cpanid, dist)",
+
+	  # Speed up files_by a lot
+	  "CREATE INDEX IF NOT EXISTS files_by ON releases (cpanid, path)",
+
+	  # Let us order releases by date quickly
+	  "CREATE INDEX IF NOT EXISTS releases_by_date ON releases (date, dist)",
+      ]
+  };
+
+
 sub create_tables {
     my $self = shift;
     my $dbh  = shift;
 
     for my $sql (values %{$self->create_tables_sql}) {
+        $dbh->do($sql);
+    }
+
+    return;
+}
+
+
+sub create_indexes {
+    my $self = shift;
+    my $dbh  = shift;
+
+    for my $sql (@{$self->create_indexes_sql}) {
         $dbh->do($sql);
     }
 
