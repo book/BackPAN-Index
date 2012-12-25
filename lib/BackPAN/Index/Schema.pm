@@ -8,16 +8,21 @@ use parent qw(DBIx::Class::Schema::Loader);
 use CLASS;
 
 CLASS->loader_options(
-    moniker_map => sub {
-        my $table = shift;
-        my $class = ucfirst $table;
-        $class =~ s/s$//;
+    result_namespace 	=> '+BackPAN::Index',
+    use_namespaces   	=> 1,
+    naming           	=> 'v7',
+    inflect_singular 	=> sub {
+	my $word = shift;
 
-        return $class;
-    },
-    result_namespace => '+BackPAN::Index',
-    use_namespaces => 1,
-    naming         => 'current',
+	# Work around bug in Linua::EN::Inflect::Phrase
+	if( $word =~ /^(first|second|third|fourth|fifth|sixth)_/ ) {
+	    $word =~ s{s$}{};
+	    return $word;
+	}
+	else {
+	    return;
+	}
+    }
 );
 
 
