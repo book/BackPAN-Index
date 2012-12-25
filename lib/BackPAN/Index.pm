@@ -15,6 +15,7 @@ use BackPAN::Index::Schema;
 use BackPAN::Index::Types;
 
 use Mouse;
+with "BackPAN::Index::Role::Log";
 
 has update =>
   is		=> 'ro',
@@ -25,11 +26,6 @@ has cache_ttl =>
   is		=> 'ro',
   isa		=> 'Int',
   default	=> 60 * 60;
-
-has debug =>
-  is		=> 'ro',
-  isa		=> 'Bool',
-  default	=> 0;
 
 has releases_only_from_authors =>
   is		=> 'ro',
@@ -93,12 +89,6 @@ sub BUILD {
 sub _dbh {
     my $self = shift;
     return $self->schema->storage->dbh;
-}
-
-sub _log {
-    my $self = shift;
-    return unless $self->debug;
-    print STDERR @_, "\n";
 }
 
 sub _update_database {
