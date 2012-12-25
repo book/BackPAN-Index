@@ -7,9 +7,6 @@ our $VERSION = '0.40';
 
 use autodie;
 use CPAN::DistnameInfo 0.09;
-use Archive::Extract;
-use Path::Class ();
-use File::stat;
 use BackPAN::Index::Schema;
 use BackPAN::Index::Types;
 
