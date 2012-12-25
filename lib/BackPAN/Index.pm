@@ -240,50 +240,12 @@ sub _database_is_empty {
 }
 
 
-# This is denormalized for performance, its read-only anyway
+
 sub _setup_database {
     my $self = shift;
 
-    my %create_for = (
-        files           => <<'SQL',
-CREATE TABLE IF NOT EXISTS files (
-    path        TEXT            NOT NULL PRIMARY KEY,
-    date        INTEGER         NOT NULL,
-    size        INTEGER         NOT NULL CHECK ( size >= 0 )
-)
-SQL
-        releases        => <<'SQL',
-CREATE TABLE IF NOT EXISTS releases (
-    path        TEXT            NOT NULL PRIMARY KEY REFERENCES files,
-    dist        TEXT            NOT NULL REFERENCES dists,
-    date        INTEGER         NOT NULL,
-    size        TEXT            NOT NULL,
-    version     TEXT            NOT NULL,
-    maturity    TEXT            NOT NULL,
-    distvname   TEXT            NOT NULL,
-    cpanid      TEXT            NOT NULL
-)
-SQL
-
-        dists           => <<'SQL',
-CREATE TABLE IF NOT EXISTS dists (
-    name                TEXT            NOT NULL PRIMARY KEY,
-    first_release       TEXT            NOT NULL REFERENCES releases,
-    latest_release      TEXT            NOT NULL REFERENCES releases,
-    first_date          INTEGER         NOT NULL,
-    latest_date         INTEGER         NOT NULL,
-    first_author        TEXT            NOT NULL,
-    latest_author       TEXT            NOT NULL,
-    num_releases        INTEGER         NOT NULL
-)
-SQL
-);
-
-    my $dbh = $self->_dbh;
-    for my $sql (values %create_for) {
-        $dbh->do($sql);
-    }
-
+    require BackPAN::Index::Schema::Create;
+    BackPAN::Index::Schema::Create->new->create_tables($self->_dbh);
     $self->schema->rescan;
 
     return;
