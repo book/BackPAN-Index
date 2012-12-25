@@ -108,7 +108,14 @@ sub _update_database {
 
     $should_update_db = 1 if $self->_database_is_empty;
 
-    return unless $should_update_db;
+    $self->_populate_database if $should_update_db;
+
+    return;
+}
+
+
+sub _populate_database {
+    my $self = shift;
 
     my $dbh = $self->_dbh;
 
