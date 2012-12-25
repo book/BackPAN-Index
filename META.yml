@@ -7,9 +7,9 @@ build_requires:
   Test::Compile: 0.11
   Test::More: 0.90
 configure_requires:
-  Module::Build: 0.37
+  Module::Build: 0.40
 dynamic_config: 1
-generated_by: 'Module::Build version 0.3705, CPAN::Meta::Converter version 2.110440'
+generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120630'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -48,6 +48,7 @@ requires:
   DBIx::Class::Schema::Loader: 0.05003
   LWP::Simple: 0
   Path::Class: 0.17
+  URI: 1.54
   autodie: 0
   parent: 0
   perl: 5.008001
