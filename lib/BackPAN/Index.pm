@@ -13,9 +13,9 @@ use Archive::Extract;
 use Path::Class ();
 use File::stat;
 use BackPAN::Index::Schema;
+use BackPAN::Index::Types;
 
 use Mouse;
-use Mouse::Util::TypeConstraints qw(class_type);
 
 has update =>
   is		=> 'ro',
@@ -54,8 +54,21 @@ has schema =>
 
 has cache =>
   is		=> 'rw',
-  isa		=> class_type('App::Cache'),
+  isa		=> 'App::Cache',
 ;
+
+has db =>
+  is		=> 'ro',
+  isa		=> 'BackPAN::Index::Database',
+  lazy		=> 1,
+  default	=> sub {
+      my $self = shift;
+
+      require BackPAN::Index::Database;
+      return BackPAN::Index::Database->new(
+	  cache => $self->cache
+      );
+  };
 
 
 sub BUILD {
@@ -93,29 +106,12 @@ sub _update_database {
     $self->_get_backpan_index;
     $self->_log("Done.");
 
-    my $cache = $self->cache;
-    my $db_file = Path::Class::file($cache->directory, "backpan.sqlite");
+    my $should_update_db =
+      $self->update 				||
+      $self->db->should_update_db 		||
+      $self->_index_archive_newer_than_db;
 
-    my $should_update_db;
-    if( ! -e $db_file ) {
-        $should_update_db = 1;
-    }
-    elsif( defined $self->update ) {
-        $should_update_db = $self->update;
-    }
-    else {
-        # Check the database file before we connect to it.  Connecting will create
-        # the file.
-        # XXX Should probably just put a timestamp in the DB
-        my $db_mtime = $db_file->stat->mtime;
-        my $db_age = time - $db_mtime;
-        $should_update_db = ($db_age > $cache->ttl);
-
-        # No matter what, update the DB if we got a new index file.
-        my $archive_mtime = -e $self->_backpan_index_archive ? $self->_backpan_index_archive->stat->mtime : 0;
-        $should_update_db = 1 if $db_mtime < $archive_mtime;
-    }
-
+    my $db_file = $self->db->db_file;
     unlink $db_file if -e $db_file and $should_update_db;
 
     $self->schema( BackPAN::Index::Schema->connect("dbi:SQLite:dbname=$db_file") );
@@ -126,6 +122,13 @@ sub _update_database {
     $self->_populate_database if $should_update_db;
 
     return;
+}
+
+sub _index_archive_newer_than_db {
+    my $self = shift;
+
+    my $archive_mtime = -e $self->_backpan_index_archive ? $self->_backpan_index_archive->stat->mtime : 0;
+    return $self->db->db_mtime < $archive_mtime;
 }
 
 

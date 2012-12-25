@@ -5,9 +5,8 @@ use warnings;
 
 our $VERSION = '0.40';
 
-use BackPAN::Index;
 use Mouse;
-use Mouse::Util::TypeConstraints qw(class_type);
+use BackPAN::Index::Types;
 
 has no_cache =>
   is		=> 'ro',
@@ -22,20 +21,19 @@ has only_authors =>
 
 has _delegate =>
   is	=> 'rw',
-  isa	=> class_type('BackPAN::Index');
+  isa	=> 'BackPAN::Index',
+  lazy  => 1,
+  default => sub {
+      my $self = shift;
 
-sub BUILD {
-    my $self = shift;
+      # Translate from PBP options to BackPAN::Index
+      my %options;
+      $options{update}                     = 1 if $self->no_cache;
+      $options{releases_only_from_authors} = 1 if $self->only_authors;
 
-    # Translate from PBP options to BackPAN::Index
-    my %options;
-    $options{update}                     = 1 if $self->no_cache;
-    $options{releases_only_from_authors} = 1 if $self->only_authors;
-
-    $self->_delegate( BackPAN::Index->new(\%options) );
-
-    return;
-}
+      require BackPAN::Index;
+      return BackPAN::Index->new(\%options);
+  };
 
 our $AUTOLOAD;
 sub AUTOLOAD {
