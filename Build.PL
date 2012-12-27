@@ -20,7 +20,6 @@ my $build = MyBuilder->new(
     'Archive::Extract'      => '0',
     'DBIx::Class'           => '0.08109',
     'DBD::SQLite'           => '1.25',
-    'DBIx::Class::Schema::Loader'       => '0.070000',
     'Mouse'		    => '0.64',
     'Path::Class'           => '0.17',
     autodie                 => '0',
