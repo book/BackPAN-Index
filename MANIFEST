@@ -2,6 +2,7 @@ Build.PL
 CHANGES
 create_backpan_index.pl
 examples/backpan.pl
+inc/MyBuilder.pm
 lib/BackPAN/Index.pm
 lib/BackPAN/Index/Database.pm
 lib/BackPAN/Index/Dist.pm
@@ -30,6 +31,7 @@ t/distributions.t
 t/file.t
 t/lib/TestUtils.pm
 t/only_authors.t
+t/Parse-BACKPAN-Packages/args.t
 t/Parse-BACKPAN-Packages/simple.t
 t/pod.t
 t/pod_coverage.t
