@@ -21,19 +21,27 @@ has only_authors =>
 
 has _delegate =>
   is	=> 'rw',
-  isa	=> 'BackPAN::Index',
-  lazy  => 1,
-  default => sub {
-      my $self = shift;
+  isa	=> 'BackPAN::Index';
 
-      # Translate from PBP options to BackPAN::Index
-      my %options;
-      $options{update}                     = 1 if $self->no_cache;
-      $options{releases_only_from_authors} = 1 if $self->only_authors;
 
-      require BackPAN::Index;
-      return BackPAN::Index->new(\%options);
-  };
+sub BUILD {
+    my $self = shift;
+    my $args = shift;
+
+    # Translate from PBP options to BackPAN::Index
+    if( exists $args->{no_cache} ) {
+	$args->{update} = $args->{no_cache};
+    }
+
+    if( exists $args->{only_authors} ) {
+	$args->{releases_only_from_authors} = $args->{only_authors};
+    }
+
+    require BackPAN::Index;
+    $self->_delegate( BackPAN::Index->new($args) );
+
+    return $self;
+}
 
 our $AUTOLOAD;
 sub AUTOLOAD {
