@@ -6,13 +6,36 @@ use warnings;
 use base 'Module::Build';
 
 
-sub build_schema {
+sub ACTION_build_schema {
+    my $self = shift;
+
     local @INC = ("lib", @INC);
 
-    require DBIx::Class::Schema::Loader;
+    require App::Cache;
     require BackPAN::Index::Database;
+    require DBIx::Class::Schema::Loader;
+    require File::Temp;
 
-    my $db = BackPAN::Index::Database->new();
+    # The SQL schema is in Database.pm.  Only regenerate the
+    # result classes if its newer.
+    return if $self->up_to_date(
+	[
+	    "lib/BackPAN/Index/Database.pm",
+	],
+	[
+	    "lib/BackPAN/Index/Dist.pm",
+	    "lib/BackPAN/Index/File.pm",
+	    "lib/BackPAN/Index/Release.pm",
+	],
+    );
+
+    my $db = BackPAN::Index::Database->new(
+	# The normal cache location is in the home directory.
+	# It would be impolite to write to it during build.
+	App::Cache->new(
+	    directory => File::Temp->new
+	)
+    );
     $db->create_tables;
 
     DBIx::Class::Schema::Loader::make_schema_at(
@@ -59,7 +82,7 @@ sub build_schema {
 sub ACTION_code {
     my $self = shift;
 
-    $self->build_schema;
+    $self->depends_on("build_schema");
 
     return $self->SUPER::ACTION_code(@_);
 }
