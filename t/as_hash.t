@@ -19,20 +19,16 @@ my $b = new_backpan();
     my $latest_release = $dist->releases->search( undef,
                                                   { order_by => {-desc => ['date']} })->first;
 
-    TODO: {
-	local $TODO = 'known bug in our DBIC schema';
-
-        is_deeply $dist->as_hash, {
-	    name            => $dist->name,
-	    first_release   => $first_release,
-	    first_date      => $first_release->date,
-	    first_author    => $first_release->cpanid,
-	    latest_release  => $latest_release,
-	    latest_date     => $latest_release->date,
-	    latest_author   => $latest_release->cpanid,
-	    num_releases    => $dist->releases->count,
-	} or diag explain $dist->as_hash;
-    }
+    is_deeply $dist->as_hash, {
+	name            => $dist->name,
+	first_release   => $first_release,
+	first_date      => $first_release->date,
+	first_author    => $first_release->cpanid,
+	latest_release  => $latest_release,
+	latest_date     => $latest_release->date,
+	latest_author   => $latest_release->cpanid,
+	num_releases    => $dist->releases->count,
+    } or diag explain $dist->as_hash;
 
     my $release = $dist->releases->search(undef, { order_by => "random()" })->first;
     note("Release is @{[$release->distvname]}");
