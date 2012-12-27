@@ -106,11 +106,9 @@ sub _update_database {
     my $db_file = $self->db->db_file;
     unlink $db_file if -e $db_file and $should_update_db;
 
-    $self->db->create_tables;
+    $self->db->create_tables if $should_update_db;
 
-    $should_update_db = 1 if $self->_database_is_empty;
-
-    $self->_populate_database if $should_update_db;
+    $self->_populate_database if $should_update_db || $self->_database_is_empty;
 
     return;
 }

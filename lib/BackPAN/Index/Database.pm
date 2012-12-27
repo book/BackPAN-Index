@@ -16,6 +16,24 @@ has db_file =>
       return Path::Class::File->new($self->cache->directory, "backpan.sqlite").'';
   };
 
+has dsn =>
+  is		=> 'ro',
+  isa		=> 'Str',
+  lazy          => 1,
+  default	=> sub {
+      my $self = shift;
+      return "dbi:SQLite:dbname=@{[$self->db_file]}";
+  };
+
+has dbh =>
+  is		=> 'ro',
+  isa		=> 'DBI::db',
+  lazy          => 1,
+  default	=> sub {
+      my $self = shift;
+      require DBI;
+      return DBI->connect($self->dsn, undef, undef, {RaiseError => 1});
+  };
 
 has schema =>
   is		=> 'ro',
@@ -25,7 +43,7 @@ has schema =>
       my $self = shift;
 
       require BackPAN::Index::Schema;
-      return BackPAN::Index::Schema->connect("dbi:SQLite:dbname=@{[$self->db_file]}");
+      return BackPAN::Index::Schema->connect(sub { $self->dbh });
   };
 
 # This is denormalized for performance, its read-only anyway
@@ -69,7 +87,6 @@ SQL
     }
   };
 
-
 has create_indexes_sql =>
   is		=> 'ro',
   isa		=> 'ArrayRef[Str]',
@@ -86,20 +103,17 @@ has create_indexes_sql =>
       ]
   };
 
-
 sub create_tables {
     my $self = shift;
 
     my $dbh = $self->dbh;
+
     for my $sql (values %{$self->create_tables_sql}) {
         $dbh->do($sql);
     }
 
-    $self->schema->rescan;
-
     return;
 }
-
 
 sub create_indexes {
     my $self = shift;
@@ -110,12 +124,6 @@ sub create_indexes {
     }
 
     return;
-}
-
-
-sub dbh {
-    my $self = shift;
-    return $self->schema->storage->dbh;
 }
 
 sub db_file_exists {

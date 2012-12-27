@@ -1,7 +1,9 @@
-use Module::Build;
 use strict;
+use lib 'inc';
 
-my $build = Module::Build->new(
+use MyBuilder;
+
+my $build = MyBuilder->new(
   license            => 'perl',
   module_name        => 'BackPAN::Index',
   dist_author        => [

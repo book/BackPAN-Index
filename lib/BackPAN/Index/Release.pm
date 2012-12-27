@@ -1,7 +1,62 @@
+use utf8;
 package BackPAN::Index::Release;
+
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 use strict;
 use warnings;
+
+use base 'DBIx::Class::Core';
+__PACKAGE__->table("releases");
+__PACKAGE__->add_columns(
+  "path",
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  "dist",
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  "date",
+  { data_type => "integer", is_nullable => 0 },
+  "size",
+  { data_type => "text", is_nullable => 0 },
+  "version",
+  { data_type => "text", is_nullable => 0 },
+  "maturity",
+  { data_type => "text", is_nullable => 0 },
+  "distvname",
+  { data_type => "text", is_nullable => 0 },
+  "cpanid",
+  { data_type => "text", is_nullable => 0 },
+);
+__PACKAGE__->set_primary_key("path");
+__PACKAGE__->belongs_to(
+  "dist",
+  "BackPAN::Index::Dist",
+  { name => "dist" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+__PACKAGE__->has_many(
+  "dists_first_releases",
+  "BackPAN::Index::Dist",
+  { "foreign.first_release" => "self.path" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+__PACKAGE__->has_many(
+  "dists_latest_releases",
+  "BackPAN::Index::Dist",
+  { "foreign.latest_release" => "self.path" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+__PACKAGE__->belongs_to(
+  "path",
+  "BackPAN::Index::File",
+  { path => "path" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2012-12-27 01:39:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MhFMcHAmoBJtN17iZgHLEw
+
 
 use overload
   q[""]         => sub { $_[0]->distvname },

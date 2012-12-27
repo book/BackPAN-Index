@@ -7,7 +7,11 @@ use BackPAN::Index::Types;
 has cache =>
   is		=> 'ro',
   isa		=> 'App::Cache',
-  required 	=> 1
+  required 	=> 1,
+  default	=> sub {
+      require App::Cache;
+      return App::Cache->new;
+  }
 ;
 
 1;

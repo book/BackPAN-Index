@@ -1,43 +1,22 @@
+use utf8;
 package BackPAN::Index::Schema;
+
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 use strict;
 use warnings;
 
-use parent qw(DBIx::Class::Schema::Loader);
+use base 'DBIx::Class::Schema';
 
-use CLASS;
-
-CLASS->loader_options(
-    result_namespace 	=> '+BackPAN::Index',
-    use_namespaces   	=> 1,
-    naming           	=> 'v7',
-    inflect_singular 	=> sub {
-	my $word = shift;
-
-	# Work around bug in Linua::EN::Inflect::Phrase
-	if( $word =~ /^(first|second|third|fourth|fifth|sixth)_/ ) {
-	    $word =~ s{s$}{};
-	    return $word;
-	}
-	else {
-	    return;
-	}
-    }
-);
+__PACKAGE__->load_classes({
+    "BackPAN::Index" => [qw(Dist File Release)],
+});
 
 
-=head1 NAME
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2012-12-27 01:39:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:nuF+3I0+Ir1lFmKHYH8kug
 
-BackPAN::Index::Schema - DBIx::Class schema class
 
-=head1 SYNOPSIS
-
-No user servicable parts inside
-
-=head1 DESCRIPTION
-
-No user servicable parts inside
-
-=cut
-
+# You can replace this text with custom code or comments, and it will be preserved on regeneration
 1;
