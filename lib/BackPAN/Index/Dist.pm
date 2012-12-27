@@ -1,7 +1,55 @@
+use utf8;
 package BackPAN::Index::Dist;
+
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 use strict;
 use warnings;
+
+use base 'DBIx::Class::Core';
+__PACKAGE__->table("dists");
+__PACKAGE__->add_columns(
+  "name",
+  { data_type => "text", is_nullable => 0 },
+  "first_release",
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  "latest_release",
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  "first_date",
+  { data_type => "integer", is_nullable => 0 },
+  "latest_date",
+  { data_type => "integer", is_nullable => 0 },
+  "first_author",
+  { data_type => "text", is_nullable => 0 },
+  "latest_author",
+  { data_type => "text", is_nullable => 0 },
+  "num_releases",
+  { data_type => "integer", is_nullable => 0 },
+);
+__PACKAGE__->set_primary_key("name");
+__PACKAGE__->belongs_to(
+  "first_release",
+  "BackPAN::Index::Release",
+  { path => "first_release" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+__PACKAGE__->belongs_to(
+  "latest_release",
+  "BackPAN::Index::Release",
+  { path => "latest_release" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+__PACKAGE__->has_many(
+  "releases",
+  "BackPAN::Index::Release",
+  { "foreign.dist" => "self.name" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2012-12-27 01:39:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BuglboqFzRDZo6vlK4n0yw
 
 use CLASS;
 use BackPAN::Index::Role::AsHash;
@@ -101,5 +149,3 @@ Returns a hash ref containing the data inside C<$dist>.
 L<BackPAN::Index>
 
 =cut
-
-1;

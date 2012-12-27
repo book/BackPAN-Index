@@ -1,7 +1,9 @@
-use Module::Build;
 use strict;
+use lib 'inc';
 
-my $build = Module::Build->new(
+use MyBuilder;
+
+my $build = MyBuilder->new(
   license            => 'perl',
   module_name        => 'BackPAN::Index',
   dist_author        => [
@@ -12,7 +14,6 @@ my $build = Module::Build->new(
   requires           => {
     'App::Cache'            => '0.37',
     'CPAN::DistnameInfo'    => '0.09',
-    'Class::Accessor::Fast' => '0',
     CLASS                   => '1.00',
     'LWP::Simple'           => '0',
     'URI'                   => '1.54',
@@ -20,6 +21,7 @@ my $build = Module::Build->new(
     'DBIx::Class'           => '0.08109',
     'DBD::SQLite'           => '1.25',
     'DBIx::Class::Schema::Loader'       => '0.070000',
+    'Mouse'		    => '0.64',
     'Path::Class'           => '0.17',
     autodie                 => '0',
     parent                  => '0',
@@ -41,7 +43,6 @@ my $build = Module::Build->new(
   },
 
   create_license        => 1,
-  create_makefile_pl    => 'traditional',
   create_readme         => 1,
 );
 $build->create_build_script;
