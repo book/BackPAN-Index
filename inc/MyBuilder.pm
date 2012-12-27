@@ -11,13 +11,8 @@ sub build_schema {
 
     require DBIx::Class::Schema::Loader;
     require BackPAN::Index::Database;
-    require File::Temp;
-    require DBI;
 
-    my $temp_db = File::Temp->new(EXLOCK => 0);
-    my $db = BackPAN::Index::Database->new(
-	dbh	=> DBI->connect("dbi:SQLite:dbname=$temp_db")
-    );
+    my $db = BackPAN::Index::Database->new();
     $db->create_tables;
 
     DBIx::Class::Schema::Loader::make_schema_at(
