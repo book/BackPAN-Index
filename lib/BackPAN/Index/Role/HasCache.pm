@@ -10,7 +10,7 @@ has cache =>
   required 	=> 1,
   default	=> sub {
       require App::Cache;
-      return App::Cache->new;
+      return App::Cache->new({ application => "BackPAN::Index" });
   }
 ;
 
