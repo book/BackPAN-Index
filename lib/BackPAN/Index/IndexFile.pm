@@ -30,11 +30,7 @@ has index_file =>
   lazy		=> 1,
   default	=> sub {
       my $self = shift;
-
-      my $file = $self->index_archive;
-      $file =~ s{\.[^.]+$}{};
-
-      return Path::Class::file($file);
+      return Path::Class::File->new("backpan-index.txt")->absolute($self->cache->directory);
   };
 
 sub index_archive_mtime {
