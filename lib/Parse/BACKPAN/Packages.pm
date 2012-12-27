@@ -5,25 +5,35 @@ use warnings;
 
 our $VERSION = '0.40';
 
-use parent qw(Class::Accessor::Fast);
+use Mouse;
+use BackPAN::Index::Types;
 
-use BackPAN::Index;
+has no_cache =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default 	=> 0;
 
-__PACKAGE__->mk_accessors(qw(
-    _delegate
-));
+has only_authors =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default	=> 1
+;
 
-sub new {
-    my $class   = shift;
-    my $options = shift;
+has _delegate =>
+  is	=> 'rw',
+  isa	=> 'BackPAN::Index',
+  lazy  => 1,
+  default => sub {
+      my $self = shift;
 
-    # Translate from PBP options to BackPAN::Index
-    $options->{update}                     = 1 if $options->{no_cache};
-    $options->{releases_only_from_authors} = $options->{only_authors};
+      # Translate from PBP options to BackPAN::Index
+      my %options;
+      $options{update}                     = 1 if $self->no_cache;
+      $options{releases_only_from_authors} = 1 if $self->only_authors;
 
-    my $backpan = BackPAN::Index->new($options);
-    return $class->SUPER::new({ _delegate => $backpan });
-}
+      require BackPAN::Index;
+      return BackPAN::Index->new(\%options);
+  };
 
 our $AUTOLOAD;
 sub AUTOLOAD {
@@ -74,7 +84,7 @@ sub distributions_by {
     my ( $self, $author ) = @_;
     return unless $author;
 
-    my $dists = $self->_dbh->selectcol_arrayref(q[
+    my $dists = $self->db->dbh->selectcol_arrayref(q[
              SELECT DISTINCT dist
              FROM   releases
              WHERE  cpanid = ?
@@ -90,7 +100,7 @@ sub distributions_by {
 sub authors {
     my $self     = shift;
 
-    my $authors = $self->_dbh->selectcol_arrayref(q[
+    my $authors = $self->db->dbh->selectcol_arrayref(q[
         SELECT DISTINCT cpanid
         FROM     releases
         ORDER BY cpanid
@@ -102,7 +112,7 @@ sub authors {
 sub size {
     my $self = shift;
 
-    my $size = $self->_dbh->selectcol_arrayref(q[
+    my $size = $self->db->dbh->selectcol_arrayref(q[
         SELECT SUM(size) FROM files
     ]);
 

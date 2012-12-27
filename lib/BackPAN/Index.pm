@@ -6,111 +6,123 @@ use warnings;
 our $VERSION = '0.40';
 
 use autodie;
-use App::Cache 0.37;
 use CPAN::DistnameInfo 0.09;
-use LWP::Simple qw(getstore head is_success);
-use Archive::Extract;
-use Path::Class ();
-use File::stat;
 use BackPAN::Index::Schema;
+use BackPAN::Index::Types;
 
-use parent qw( Class::Accessor::Fast );
+use Mouse;
+with 'BackPAN::Index::Role::Log', 'BackPAN::Index::Role::HasCache';
 
-__PACKAGE__->mk_accessors(qw(
-    update
-    cache_ttl
-    debug
-    releases_only_from_authors
-    cache_dir
-    backpan_index_url
+has update =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default	=> 0;
 
-    backpan_index schema cache 
-));
+has cache_ttl =>
+  is		=> 'ro',
+  isa		=> 'Int',
+  default	=> 60 * 60;
 
-my %Defaults = (
-    backpan_index_url           => "http://gitpan.integra.net/backpan-index.gz",
-    releases_only_from_authors  => 1,
-    debug                       => 0,
-    cache_ttl                   => 60 * 60,
-);
+has releases_only_from_authors =>
+  is		=> 'ro',
+  isa		=> 'Bool',
+  default	=> 1;
+
+has backpan_index_url =>
+  is		=> 'ro',
+  isa		=> 'Str',
+  default	=> "http://gitpan.integra.net/backpan-index.gz";
+
+has backpan_index =>
+  is		=> 'ro',
+  isa		=> 'BackPAN::Index::IndexFile',
+  lazy		=> 1,
+  default	=> sub {
+      my $self = shift;
+
+      require BackPAN::Index::IndexFile;
+      return BackPAN::Index::IndexFile->new(
+	  cache 	=> $self->cache,
+	  index_url	=> $self->backpan_index_url
+      );
+  };
+
+has cache_dir =>
+  is		=> 'ro',
+  isa		=> 'Str'
+;
+
+has '+cache' =>
+  is		=> 'rw',
+  required	=> 0,
+  lazy		=> 1,
+  default	=> sub {
+      my $self = shift;
+
+      my %cache_opts;
+      $cache_opts{ttl}       = $self->cache_ttl;
+      $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
+      $cache_opts{enabled}   = !$self->update;
+
+      require App::Cache;
+      return App::Cache->new( \%cache_opts );
+  }
+;
+
+has db =>
+  is		=> 'ro',
+  isa		=> 'BackPAN::Index::Database',
+  handles	=> [qw(schema)],
+  lazy		=> 1,
+  default	=> sub {
+      my $self = shift;
+
+      require BackPAN::Index::Database;
+      return BackPAN::Index::Database->new(
+	  cache => $self->cache
+      );
+  };
 
 
-sub new {
-    my $class   = shift;
-    my $options = shift;
-
-    $options ||= {};
-
-    # Apply defaults
-    %$options = ( %Defaults, %$options );
-
-    my $self  = $class->SUPER::new($options);
-
-    my %cache_opts;
-    $cache_opts{ttl}       = $self->cache_ttl;
-    $cache_opts{directory} = $self->cache_dir if $self->cache_dir;
-    $cache_opts{enabled}   = !$self->update;
-
-    my $cache = App::Cache->new( \%cache_opts );
-    $self->cache($cache);
+sub BUILD {
+    my $self = shift;
 
     $self->_update_database();
 
     return $self;
 }
 
-sub _dbh {
-    my $self = shift;
-    return $self->schema->storage->dbh;
-}
-
-sub _log {
-    my $self = shift;
-    return unless $self->debug;
-    print STDERR @_, "\n";
-}
-
 sub _update_database {
     my $self = shift;
 
     # Delay loading it into memory until we need it
-    $self->_log("Fetching BackPAN index...");
-    $self->_get_backpan_index;
-    $self->_log("Done.");
+    $self->backpan_index->get_index if $self->backpan_index->should_index_be_updated;
 
-    my $cache = $self->cache;
-    my $db_file = Path::Class::file($cache->directory, "backpan.sqlite");
+    my $should_update_db =
+      $self->update 				||
+      $self->db->should_update_db 		||
+      $self->_index_archive_newer_than_db;
 
-    my $should_update_db;
-    if( ! -e $db_file ) {
-        $should_update_db = 1;
-    }
-    elsif( defined $self->update ) {
-        $should_update_db = $self->update;
-    }
-    else {
-        # Check the database file before we connect to it.  Connecting will create
-        # the file.
-        # XXX Should probably just put a timestamp in the DB
-        my $db_mtime = $db_file->stat->mtime;
-        my $db_age = time - $db_mtime;
-        $should_update_db = ($db_age > $cache->ttl);
-
-        # No matter what, update the DB if we got a new index file.
-        my $archive_mtime = -e $self->_backpan_index_archive ? $self->_backpan_index_archive->stat->mtime : 0;
-        $should_update_db = 1 if $db_mtime < $archive_mtime;
-    }
-
+    my $db_file = $self->db->db_file;
     unlink $db_file if -e $db_file and $should_update_db;
 
-    $self->schema( BackPAN::Index::Schema->connect("dbi:SQLite:dbname=$db_file") );
-    $self->_setup_database;
+    $self->db->create_tables if $should_update_db;
 
-    $should_update_db = 1 if $self->_database_is_empty;
+    $self->_populate_database if $should_update_db || $self->_database_is_empty;
 
-    return unless $should_update_db;
+    return;
+}
 
-    my $dbh = $self->_dbh;
+sub _index_archive_newer_than_db {
+    my $self = shift;
+
+    return $self->db->db_mtime < $self->backpan_index->index_archive_mtime;
+}
+
+sub _populate_database {
+    my $self = shift;
+
+    my $dbh = $self->db->dbh;
 
     $self->_log("Populating database...");
     $dbh->begin_work;
@@ -142,7 +154,7 @@ sub _update_database {
 
     my %dists;
     my %files;
-    open my $fh, $self->_backpan_index_file;
+    open my $fh, $self->backpan_index->index_file;
     while( my $line = <$fh> ) {
         chomp $line;
         my ( $path, $date, $size, @junk ) = split ' ', $line;
@@ -214,7 +226,7 @@ sub _update_database {
     }
 
     # Add indexes after inserting so as not to slow down the inserts
-    $self->_add_indexes;
+    $self->db->create_indexes;
 
     $dbh->commit;
 
@@ -232,142 +244,6 @@ sub _database_is_empty {
     return 0;
 }
 
-
-# This is denormalized for performance, its read-only anyway
-sub _setup_database {
-    my $self = shift;
-
-    my %create_for = (
-        files           => <<'SQL',
-CREATE TABLE IF NOT EXISTS files (
-    path        TEXT            NOT NULL PRIMARY KEY,
-    date        INTEGER         NOT NULL,
-    size        INTEGER         NOT NULL CHECK ( size >= 0 )
-)
-SQL
-        releases        => <<'SQL',
-CREATE TABLE IF NOT EXISTS releases (
-    path        TEXT            NOT NULL PRIMARY KEY REFERENCES files,
-    dist        TEXT            NOT NULL REFERENCES dists,
-    date        INTEGER         NOT NULL,
-    size        TEXT            NOT NULL,
-    version     TEXT            NOT NULL,
-    maturity    TEXT            NOT NULL,
-    distvname   TEXT            NOT NULL,
-    cpanid      TEXT            NOT NULL
-)
-SQL
-
-        dists           => <<'SQL',
-CREATE TABLE IF NOT EXISTS dists (
-    name                TEXT            NOT NULL PRIMARY KEY,
-    first_release       TEXT            NOT NULL REFERENCES releases,
-    latest_release      TEXT            NOT NULL REFERENCES releases,
-    first_date          INTEGER         NOT NULL,
-    latest_date         INTEGER         NOT NULL,
-    first_author        TEXT            NOT NULL,
-    latest_author       TEXT            NOT NULL,
-    num_releases        INTEGER         NOT NULL
-)
-SQL
-);
-
-    my $dbh = $self->_dbh;
-    for my $sql (values %create_for) {
-        $dbh->do($sql);
-    }
-
-    $self->schema->rescan;
-
-    return;
-}
-
-
-sub _add_indexes {
-    my $self = shift;
-
-    my @indexes = (
-        # Speed up dists_by several orders of magnitude
-        "CREATE INDEX IF NOT EXISTS dists_by ON releases (cpanid, dist)",
-
-        # Speed up files_by a lot
-        "CREATE INDEX IF NOT EXISTS files_by ON releases (cpanid, path)",
-
-        # Let us order releases by date quickly
-        "CREATE INDEX IF NOT EXISTS releases_by_date ON releases (date, dist)",
-    );
-    my $dbh = $self->_dbh;
-    for my $sql (@indexes) {
-        $dbh->do($sql);
-    }
-}
-
-
-sub _get_backpan_index {
-    my $self = shift;
-    
-    my $url = $self->backpan_index_url;
-
-    return if !$self->_backpan_index_has_changed;
-
-    my $status = getstore($url, $self->_backpan_index_archive.'');
-    die "Error fetching $url: $status" unless is_success($status);
-
-    # Faster
-    local $Archive::Extract::PREFER_BIN = 1;
-
-    # Archive::Extract is vulnerable to the ORS.
-    local $\;
-
-    my $ae = Archive::Extract->new( archive => $self->_backpan_index_archive );
-    $ae->extract( to => $self->_backpan_index_file )
-      or die "Problem extracting @{[ $self->_backpan_index_archive ]}: @{[ $ae->error ]}";
-
-    # If the backpan index age is older than the TTL this prevents us
-    # from immediately looking again.
-    # XXX Should probably use a "last checked" semaphore file
-    $self->_backpan_index_file->touch;
-
-    return;
-}
-
-
-sub _backpan_index_archive {
-    my $self = shift;
-
-    require URI;
-    my $file = URI->new($self->backpan_index_url)->path;
-    $file = Path::Class::file($file)->basename;
-    return Path::Class::file($file)->absolute($self->cache->directory);
-}
-
-
-sub _backpan_index_file {
-    my $self = shift;
-
-    my $file = $self->_backpan_index_archive;
-    $file =~ s{\.[^.]+$}{};
-
-    return Path::Class::file($file);
-}
-
-
-sub _backpan_index_has_changed {
-    my $self = shift;
-
-    my $file = $self->_backpan_index_file;
-    return 1 unless -e $file;
-
-    my $local_mod_time = stat($file)->mtime;
-    my $local_age = time - $local_mod_time;
-    return 0 unless $local_age > $self->cache->ttl;
-
-    # We looked, don't have to look again until the ttl is up.
-    $self->_backpan_index_file->touch;
-
-    my(undef, undef, $remote_mod_time) = head($self->backpan_index_url);
-    return ($remote_mod_time || 0) > $local_mod_time;
-}
 
 sub file {
     my($self, $path) = @_;

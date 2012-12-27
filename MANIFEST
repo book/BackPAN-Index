@@ -3,14 +3,18 @@ CHANGES
 create_backpan_index.pl
 examples/backpan.pl
 lib/BackPAN/Index.pm
+lib/BackPAN/Index/Database.pm
 lib/BackPAN/Index/Dist.pm
 lib/BackPAN/Index/File.pm
+lib/BackPAN/Index/IndexFile.pm
 lib/BackPAN/Index/Release.pm
 lib/BackPAN/Index/Role/AsHash.pm
+lib/BackPAN/Index/Role/HasCache.pm
+lib/BackPAN/Index/Role/Log.pm
 lib/BackPAN/Index/Schema.pm
+lib/BackPAN/Index/Types.pm
 lib/Parse/BACKPAN/Packages.pm
 LICENSE
-Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.json
@@ -30,3 +34,4 @@ t/Parse-BACKPAN-Packages/simple.t
 t/pod.t
 t/pod_coverage.t
 t/stringify.t
+t/types.t
