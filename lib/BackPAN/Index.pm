@@ -30,8 +30,13 @@ has releases_only_from_authors =>
 
 has backpan_index_url =>
   is		=> 'ro',
-  isa		=> 'Str',
-  default	=> "http://gitpan.integra.net/backpan-index.gz";
+  isa		=> 'URI',
+  coerce        => 1,
+  builder       => 'default_backpan_index_url';
+
+sub default_backpan_index_url {
+    return "http://gitpan.integra.net/backpan-index.gz";
+}
 
 has backpan_index =>
   is		=> 'ro',
