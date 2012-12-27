@@ -57,12 +57,12 @@ __PACKAGE__->belongs_to(
 # Created by DBIx::Class::Schema::Loader v0.07033 @ 2012-12-27 01:39:08
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MhFMcHAmoBJtN17iZgHLEw
 
+use Mouse;
+with 'BackPAN::Index::Role::AsHash';
 
 use overload
   q[""]         => sub { $_[0]->distvname },
   fallback      => 1;
-
-use BackPAN::Index::Role::AsHash;
 
 sub data_methods {
     return qw(dist version cpanid date path maturity);

@@ -29,14 +29,15 @@ __PACKAGE__->might_have(
 # Created by DBIx::Class::Schema::Loader v0.07033 @ 2012-12-27 01:39:08
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gqi9QR+IxPMmdduz2/1BHA
 
+use Mouse;
+with 'BackPAN::Index::Role::AsHash';
+
 use URI;
 use File::Basename qw(basename);
 
 use overload
   q[""]         => sub { $_[0]->path },
   fallback      => 1;
-
-use BackPAN::Index::Role::AsHash;
 
 sub backpan_root {
     return URI->new("http://backpan.perl.org/");

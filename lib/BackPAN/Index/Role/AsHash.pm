@@ -1,13 +1,8 @@
 package BackPAN::Index::Role::AsHash;
 
-use strict;
-use warnings;
+use Mouse::Role;
 
-use base 'Exporter';
-our @EXPORT   = qw(as_hash);
-our @REQUIRED = qw(data_methods);
-
-use CLASS;
+requires qw(data_methods);
 
 sub as_hash {
     my $self = shift;
