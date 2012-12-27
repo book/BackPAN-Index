@@ -1,12 +1,23 @@
 Revision history for Perl module BackPAN::Index
 
 0.41
-  Changes
+  Bug Fixes
+  * BackPAN::Index now has a file() method, as documented in BackPAN::Index::File.
   * Changed the default backpan URL for fetching files to http://backpan.perl.org
     rather than the backpan.cpan.org redirect. [rt.cpan.org 68492]
 
-  Bug Fixes
-  * BackPAN::Index now has a file() method, as documented in BackPAN::Index::File.
+  Test Fixes
+  * Tests were downloading an old index.
+
+  Misc
+  * The result classes are no longer generated at runtime. Speeds up load time
+    and reduces bugs.  This also fixes [rt.cpan.org 82107].
+  * Use the same filename for the unpacked index.
+
+  Dist Changes
+  * The compatibility Makefile.PL has been removed.  The build process has
+    gotten complicated.
+  * The bug tracker now points at the correct place.
 
 
 0.40  Tue, 01 Mar 2011 11:57:38 +1100
