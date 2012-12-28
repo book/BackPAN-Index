@@ -32,6 +32,10 @@ my $build = MyBuilder->new(
     'Test::Compile'         => '0.11',
   },
 
+  configure_requires => {
+    'Module::Build'         => '0.340201',
+  },
+
   recursive_test_files  => 1,
 
   meta_merge => {
