@@ -33,8 +33,8 @@ note "test file and dir coercion"; {
     isa_ok $obj->file, "Path::Class::File";
     isa_ok $obj->dir,  "Path::Class::Dir";
 
-    is $obj->file, "/foo/bar/baz.txt";
-    is $obj->dir,  "/what/stuff";
+    is $obj->file, Path::Class::File->new("", "foo","bar","baz.txt");
+    is $obj->dir,  Path::Class::File->new("", "what", "stuff");
 }
 
 done_testing;

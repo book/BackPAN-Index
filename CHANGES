@@ -1,5 +1,10 @@
 Revision history for Perl module BackPAN::Index
 
+0.42
+  Test Fixes
+  * Fixed t/types.t on Windows.
+
+
 0.41  Thu Dec 27 04:00:45 PST 2012
   Bug Fixes
   * BackPAN::Index now has a file() method, as documented in BackPAN::Index::File.
