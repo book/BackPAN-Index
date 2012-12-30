@@ -3,7 +3,7 @@ package BackPAN::Index;
 use strict;
 use warnings;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 use autodie;
 use CPAN::DistnameInfo 0.09;

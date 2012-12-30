@@ -1,6 +1,6 @@
 Revision history for Perl module BackPAN::Index
 
-0.42
+0.42  Sun Dec 30 10:59:38 PST 2012
   Test Fixes
   * Fixed t/types.t on Windows.
 

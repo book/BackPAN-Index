@@ -18,7 +18,7 @@ name: BackPAN-Index
 provides:
   BackPAN::Index:
     file: lib/BackPAN/Index.pm
-    version: 0.41
+    version: 0.42
   BackPAN::Index::Database:
     file: lib/BackPAN/Index/Database.pm
     version: 0
@@ -70,4 +70,4 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=BackPAN-Index
   license: http://dev.perl.org/licenses/
   repository: http://github.com/acme/parse-backpan-packages
-version: 0.41
+version: 0.42

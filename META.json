@@ -47,7 +47,7 @@
    "provides" : {
       "BackPAN::Index" : {
          "file" : "lib/BackPAN/Index.pm",
-         "version" : "0.41"
+         "version" : "0.42"
       },
       "BackPAN::Index::Database" : {
          "file" : "lib/BackPAN/Index/Database.pm",
@@ -106,5 +106,5 @@
          "url" : "http://github.com/acme/parse-backpan-packages"
       }
    },
-   "version" : "0.41"
+   "version" : "0.42"
 }
