@@ -6,7 +6,8 @@ use warnings;
 use base 'Module::Build';
 
 
-sub ACTION_build_schema {
+# Create the DBIx::Class result classes
+sub ACTION_result_classes {
     my $self = shift;
 
     local @INC = ("lib", @INC);
@@ -77,14 +78,6 @@ sub ACTION_build_schema {
 
     # Throw the generated schema away.
     unlink "lib/BackPAN/Index/SchemaThrowaway.pm";
-}
-
-sub ACTION_code {
-    my $self = shift;
-
-    $self->depends_on("build_schema");
-
-    return $self->SUPER::ACTION_code(@_);
 }
 
 1;

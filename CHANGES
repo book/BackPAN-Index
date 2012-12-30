@@ -4,6 +4,9 @@ Revision history for Perl module BackPAN::Index
   Test Fixes
   * Fixed t/types.t on Windows.
 
+  Dist Fixes
+  * DBIx::Class::Schema::Loader is no longer needed to build the module.
+
 
 0.41  Thu Dec 27 04:00:45 PST 2012
   Bug Fixes
