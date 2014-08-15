@@ -28,6 +28,11 @@ has releases_only_from_authors =>
   isa		=> 'Bool',
   default	=> 1;
 
+has normalize =>
+  is            => 'ro',
+  isa           => 'Bool',
+  default       => 1;
+
 has backpan_index_url =>
   is		=> 'ro',
   isa		=> 'URI',
@@ -88,6 +93,31 @@ has db =>
       );
   };
 
+has normalize_dist_names =>
+  is            => 'ro',
+  isa           => 'HashRef',
+  default       => sub {
+      return {
+          uri                             => 'URIC',
+          'Webservice-Google-Suggest'     => 'WebService-Google-Suggest'
+      };
+  };
+
+has normalize_releases =>
+  is            => 'ro',
+  isa           => 'HashRef',
+  default       => sub {
+      return {
+          # This is 箆-0.01.  I went with the unidecoded name instead
+          # because I don't want to mess with Unicode right now.
+          # Maybe later.
+          'authors/id/M/MA/MARCEL/-0.01.tar.gz'         => {
+              dist      => 'Bi',
+              version   => '0.01',
+              distvname => 'Bi-0.01',
+          }
+      };
+  };
 
 sub BUILD {
     my $self = shift;
@@ -132,8 +162,11 @@ sub _populate_database {
     $self->_log("Populating database...");
     $dbh->begin_work;
 
-    # Get it out of the hot loop.
-    my $only_authors = $self->releases_only_from_authors;
+    # Get them out of the hot loop.
+    my $only_authors     = $self->releases_only_from_authors;
+    my $should_normalize = $self->normalize;
+    my $normalize_dist_names = $self->normalize_dist_names;
+    my $normalize_releases   = $self->normalize_releases;
 
     my $insert_file_sth = $dbh->prepare(q[
         INSERT INTO files
@@ -184,12 +217,21 @@ sub _populate_database {
         my $i = CPAN::DistnameInfo->new( $path );
 
         my $dist = $i->dist;
-        next unless $i->dist;
+        next unless $dist;
+
+        my $version = $i->version || '';
+
+        # Normalize distribution names
+        if( $should_normalize ) {
+            $dist = $normalize_dist_names->{$dist} || $dist;
+            $dist = $normalize_releases->{$path}{dist} || $dist;
+            $version = $normalize_releases->{$path}{version} || $version;
+        }
 
         $insert_release_sth->execute(
             $path,
             $dist,
-            $i->version || '',
+            $version,
             $date,
             $size,
             $i->maturity,
@@ -372,6 +414,15 @@ Defaults to false.
 If true, only files in the C<authors> directory will be considered as
 releases.  If false any file in the index may be considered for a
 release.
+
+Defaults to true.
+
+=head3 normalize
+
+If true, various fixes and normalizations of distribution names and
+version numbers will be performed.  This will result in a more usable
+index, but it will no longer be a canonical representation of the
+files on BackPAN.
 
 Defaults to true.
 
