@@ -426,6 +426,29 @@ files on BackPAN.
 
 Defaults to true.
 
+=head3 normalize_dist_names
+
+A hash ref of distribution names and what to rename them to.
+
+For example, C<< { uri => "URIC" } >> would ensure that a release like
+"uri-2.00.tar.gz" is counted as being part of the URIC distribution.
+
+Defaults to something sensible.
+
+=head3 normalize_releases
+
+A hash ref.  Keys are release paths.  Values are hash refs of what
+parts of the release to change.
+
+For example, here C<< SOMEONE/Foo-Bar-.01.tar.gz >> is given a version
+of 0.01 instead of .01.  The release's distvname will also be changed to
+C<< Foo-Bar-0.01 >>.
+
+    'authors/id/S/SO/SOMEONE/Foo-Bar-.01.tar.gz' => {
+        version         => '0.01',
+    }
+
+
 =head3 cache_dir
 
 Location of the cache directory.
