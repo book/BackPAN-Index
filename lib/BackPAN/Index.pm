@@ -114,7 +114,6 @@ has normalize_releases =>
           'authors/id/M/MA/MARCEL/-0.01.tar.gz'         => {
               dist      => 'Bi',
               version   => '0.01',
-              distvname => 'Bi-0.01',
           }
       };
   };
@@ -194,69 +193,82 @@ sub _populate_database {
     my %files;
     open my $fh, $self->backpan_index->index_file;
     while( my $line = <$fh> ) {
+        my %release;
         chomp $line;
-        my ( $path, $date, $size, @junk ) = split ' ', $line;
+        @release{"path", "date", "size", "junk"} = split ' ', $line;
 
-        if( $files{$path}++ ) {
-            $self->_log("Duplicate file $path in index, ignoring");
+        if( $files{$release{path}}++ ) {
+            $self->_log("Duplicate file $release{path} in index, ignoring");
             next;
         }
 
-        if( !defined $path or !defined $date or !defined $size or @junk ) {
+        if( !defined $release{path} or
+            !defined $release{date} or
+            !defined $release{size} or
+            $release{junk}
+        ) {
             $self->_log("Bad data read at line $.: $line");
             next;
         }
 
-        next unless $size;
-        next if $only_authors and $path !~ m{^authors/};
+        next unless $release{size};
+        next if $only_authors and $release{path} !~ m{^authors/};
 
-        $insert_file_sth->execute($path, $date, $size);
+        $insert_file_sth->execute(@release{"path", "date", "size"});
 
-        next if $path =~ /\.(readme|meta)$/;
+        next if $release{path} =~ /\.(readme|meta)$/;
 
-        my $i = CPAN::DistnameInfo->new( $path );
+        my $i = CPAN::DistnameInfo->new( $release{path} );
 
-        my $dist = $i->dist;
-        next unless $dist;
-
-        my $version = $i->version || '';
+        $release{dist}      = $i->dist    || '';
+        $release{version}   = $i->version || '';
+        $release{maturity}  = $i->maturity;
+        $release{cpanid}    = $i->cpanid;
+        $release{distvname} = $i->distvname;
 
         # Normalize distribution names
         if( $should_normalize ) {
-            $dist = $normalize_dist_names->{$dist} || $dist;
-            $dist = $normalize_releases->{$path}{dist} || $dist;
-            $version = $normalize_releases->{$path}{version} || $version;
+            $release{dist} = $normalize_dist_names->{$release{dist}} || $release{dist};
+
+            if( my $normalize_release = $normalize_releases->{$release{path}} ) {
+                for my $key (keys %$normalize_release) {
+                    $release{$key} = $normalize_release->{$key};
+                }
+
+                # Recalculate the distvname if the dist or version changed
+                $release{distvname} = $release{dist}.'-'.$release{version} if
+                  defined $normalize_release->{dist} or
+                  defined $normalize_release->{version};
+            }
         }
 
+        next unless $release{dist};
+
         $insert_release_sth->execute(
-            $path,
-            $dist,
-            $version,
-            $date,
-            $size,
-            $i->maturity,
-            $i->cpanid,
-            $i->distvname,
+            @release{
+                "path", "dist", "version", "date", "size",
+                "maturity", "cpanid", "distvname"
+            }
         );
 
 
         # Update aggregate data about dists
-        my $distdata = ($dists{$dist} ||= { name => $dist });
+        my $distdata = ($dists{$release{dist}} ||= { name => $release{dist} });
 
         if( !defined $distdata->{first_release} ||
-            $date < $distdata->{first_date} )
+            $release{date} < $distdata->{first_date} )
         {
-            $distdata->{first_release} = $path;
-            $distdata->{first_author}  = $i->cpanid;
-            $distdata->{first_date}    = $date;
+            $distdata->{first_release} = $release{path};
+            $distdata->{first_author}  = $release{cpanid};
+            $distdata->{first_date}    = $release{date};
         }
 
         if( !defined $distdata->{latest_release} ||
-            $date > $distdata->{latest_date} )
+            $release{date} > $distdata->{latest_date} )
         {
-            $distdata->{latest_release} = $path;
-            $distdata->{latest_author}  = $i->cpanid;
-            $distdata->{latest_date}    = $date;
+            $distdata->{latest_release} = $release{path};
+            $distdata->{latest_author}  = $release{cpanid};
+            $distdata->{latest_date}    = $release{date};
         }
 
         $distdata->{num_releases}++;
