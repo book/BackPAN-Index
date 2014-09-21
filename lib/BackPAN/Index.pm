@@ -28,6 +28,11 @@ has releases_only_from_authors =>
   isa		=> 'Bool',
   default	=> 1;
 
+has normalize =>
+  is            => 'ro',
+  isa           => 'Bool',
+  default       => 1;
+
 has backpan_index_url =>
   is		=> 'ro',
   isa		=> 'URI',
@@ -88,6 +93,30 @@ has db =>
       );
   };
 
+has normalize_dist_names =>
+  is            => 'ro',
+  isa           => 'HashRef',
+  default       => sub {
+      return {
+          uri                             => 'URIC',
+          'Webservice-Google-Suggest'     => 'WebService-Google-Suggest'
+      };
+  };
+
+has normalize_releases =>
+  is            => 'ro',
+  isa           => 'HashRef',
+  default       => sub {
+      return {
+          # This is 箆-0.01.  I went with the unidecoded name instead
+          # because I don't want to mess with Unicode right now.
+          # Maybe later.
+          'authors/id/M/MA/MARCEL/-0.01.tar.gz'         => {
+              dist      => 'Bi',
+              version   => '0.01',
+          }
+      };
+  };
 
 sub BUILD {
     my $self = shift;
@@ -132,8 +161,11 @@ sub _populate_database {
     $self->_log("Populating database...");
     $dbh->begin_work;
 
-    # Get it out of the hot loop.
-    my $only_authors = $self->releases_only_from_authors;
+    # Get them out of the hot loop.
+    my $only_authors     = $self->releases_only_from_authors;
+    my $should_normalize = $self->normalize;
+    my $normalize_dist_names = $self->normalize_dist_names;
+    my $normalize_releases   = $self->normalize_releases;
 
     my $insert_file_sth = $dbh->prepare(q[
         INSERT INTO files
@@ -161,60 +193,82 @@ sub _populate_database {
     my %files;
     open my $fh, $self->backpan_index->index_file;
     while( my $line = <$fh> ) {
+        my %release;
         chomp $line;
-        my ( $path, $date, $size, @junk ) = split ' ', $line;
+        @release{"path", "date", "size", "junk"} = split ' ', $line;
 
-        if( $files{$path}++ ) {
-            $self->_log("Duplicate file $path in index, ignoring");
+        if( $files{$release{path}}++ ) {
+            $self->_log("Duplicate file $release{path} in index, ignoring");
             next;
         }
 
-        if( !defined $path or !defined $date or !defined $size or @junk ) {
+        if( !defined $release{path} or
+            !defined $release{date} or
+            !defined $release{size} or
+            $release{junk}
+        ) {
             $self->_log("Bad data read at line $.: $line");
             next;
         }
 
-        next unless $size;
-        next if $only_authors and $path !~ m{^authors/};
+        next unless $release{size};
+        next if $only_authors and $release{path} !~ m{^authors/};
 
-        $insert_file_sth->execute($path, $date, $size);
+        $insert_file_sth->execute(@release{"path", "date", "size"});
 
-        next if $path =~ /\.(readme|meta)$/;
+        next if $release{path} =~ /\.(readme|meta)$/;
 
-        my $i = CPAN::DistnameInfo->new( $path );
+        my $i = CPAN::DistnameInfo->new( $release{path} );
 
-        my $dist = $i->dist;
-        next unless $i->dist;
+        $release{dist}      = $i->dist    || '';
+        $release{version}   = $i->version || '';
+        $release{maturity}  = $i->maturity;
+        $release{cpanid}    = $i->cpanid;
+        $release{distvname} = $i->distvname;
+
+        # Normalize distribution names
+        if( $should_normalize ) {
+            $release{dist} = $normalize_dist_names->{$release{dist}} || $release{dist};
+
+            if( my $normalize_release = $normalize_releases->{$release{path}} ) {
+                for my $key (keys %$normalize_release) {
+                    $release{$key} = $normalize_release->{$key};
+                }
+
+                # Recalculate the distvname if the dist or version changed
+                $release{distvname} = $release{dist}.'-'.$release{version} if
+                  defined $normalize_release->{dist} or
+                  defined $normalize_release->{version};
+            }
+        }
+
+        next unless $release{dist};
 
         $insert_release_sth->execute(
-            $path,
-            $dist,
-            $i->version || '',
-            $date,
-            $size,
-            $i->maturity,
-            $i->cpanid,
-            $i->distvname,
+            @release{
+                "path", "dist", "version", "date", "size",
+                "maturity", "cpanid", "distvname"
+            }
         );
 
 
         # Update aggregate data about dists
-        my $distdata = ($dists{$dist} ||= { name => $dist });
+        my $distdata = ($dists{$release{dist}} ||= { name => $release{dist} });
 
         if( !defined $distdata->{first_release} ||
-            $date < $distdata->{first_date} )
+            $release{date} < $distdata->{first_date} )
         {
-            $distdata->{first_release} = $path;
-            $distdata->{first_author}  = $i->cpanid;
-            $distdata->{first_date}    = $date;
+            $distdata->{first_release} = $release{path};
+            $distdata->{first_author}  = $release{cpanid};
+            $distdata->{first_date}    = $release{date};
         }
 
         if( !defined $distdata->{latest_release} ||
-            $date > $distdata->{latest_date} )
+            $release{date} > $distdata->{latest_date} )
         {
-            $distdata->{latest_release} = $path;
-            $distdata->{latest_author}  = $i->cpanid;
-            $distdata->{latest_date}    = $date;
+            $distdata->{latest_release} = $release{path};
+            $distdata->{latest_author}  = $release{cpanid};
+            $distdata->{latest_date}    = $release{date};
         }
 
         $distdata->{num_releases}++;
@@ -374,6 +428,38 @@ releases.  If false any file in the index may be considered for a
 release.
 
 Defaults to true.
+
+=head3 normalize
+
+If true, various fixes and normalizations of distribution names and
+version numbers will be performed.  This will result in a more usable
+index, but it will no longer be a canonical representation of the
+files on BackPAN.
+
+Defaults to true.
+
+=head3 normalize_dist_names
+
+A hash ref of distribution names and what to rename them to.
+
+For example, C<< { uri => "URIC" } >> would ensure that a release like
+"uri-2.00.tar.gz" is counted as being part of the URIC distribution.
+
+Defaults to something sensible.
+
+=head3 normalize_releases
+
+A hash ref.  Keys are release paths.  Values are hash refs of what
+parts of the release to change.
+
+For example, here C<< SOMEONE/Foo-Bar-.01.tar.gz >> is given a version
+of 0.01 instead of .01.  The release's distvname will also be changed to
+C<< Foo-Bar-0.01 >>.
+
+    'authors/id/S/SO/SOMEONE/Foo-Bar-.01.tar.gz' => {
+        version         => '0.01',
+    }
+
 
 =head3 cache_dir
 
