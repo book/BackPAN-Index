@@ -103,6 +103,9 @@ has create_indexes_sql =>
 
 	  # Let us order releases by date quickly
 	  "CREATE INDEX IF NOT EXISTS releases_by_date ON releases (date, dist)",
+
+          # Quickly get all the releases for a given distribution
+          "CREATE INDEX IF NOT EXISTS releases_for_dist ON releases (dist)",
       ]
   };
 
