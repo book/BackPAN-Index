@@ -407,7 +407,7 @@ If false, the index will never be updated even if the cache is
 expired.  It will always create a new index if one does not exist.
 
 By default the index is cached and checked for updates according to
-C<<$backpan->cache_ttl>>.
+C<< $backpan->cache_ttl >>.
 
 =head3 cache_ttl
 
