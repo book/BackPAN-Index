@@ -47,8 +47,8 @@ Returns a list of methods which get data about the object.
     my $hash = $self->as_hash;
 
 Produces a hash reference representing the object's data based on
-C<<$self->data_methods>>.  Each key is a method name, the value is
-C<<$self->$method>>.
+C<< $self->data_methods >>.  Each key is a method name, the value is
+C<< $self->$method >>.
 
 =cut
 
