@@ -1,5 +1,8 @@
 #!perl -T
 
+use warnings;
+use strict;
+
 use Test::More;
 eval "use Test::Pod 1.14";
 plan skip_all => "Author test" unless $ENV{AUTHOR_TESTING};
