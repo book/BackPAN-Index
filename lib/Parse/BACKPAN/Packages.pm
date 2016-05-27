@@ -184,8 +184,8 @@ want this caching then you can pass in:
 
 =head2 authors
 
-The authors method returns a list of all the authors. This is meant so
-that you can pass them into the distributions_by method:
+Returns a list of all the authors. This is meant so that you can pass them
+into the distributions_by method:
 
   my @authors = $p->authors;
 
@@ -193,27 +193,26 @@ that you can pass them into the distributions_by method:
 
   my $distributions = $p->distributions;
 
-The distributions method returns an array ref of the names of all the
-distributions in BackPAN.
+Returns an array ref of the names of all the distributions in BackPAN.
 
 =head2 releases
 
-The releases method returns a list of objects representing all
-the different releases of a distribution:
+Returns a list of objects representing all the different releases of a
+distribution:
 
   # see Parse::BACKPAN::Packages::Release
   my @acme_colours = $p->releases("Acme-Colour");
 
 =head2 distributions_by
 
-The distributions_by method returns a list of distribution names
-representing all the distributions that an author has uploaded:
+Returns a list of distribution names representing all the distributions that
+an author has uploaded:
 
   my @acmes = $p->distributions_by('LBROCARD');
 
 =head2 file
 
-The file method finds metadata relating to a file:
+Finds metadata relating to a file:
 
   # see Parse::BACKPAN::Packages::File
   my $file = $p->file("authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz");
@@ -221,15 +220,14 @@ The file method finds metadata relating to a file:
 
 =head2 files
 
-The files method returns a hash reference where the keys are the
-filenames of the files on CPAN and the values are
-Parse::BACKPAN::Packages::File objects:
+Returns a hash reference where the keys are the filenames of the files on
+CPAN and the values are Parse::BACKPAN::Packages::File objects:
 
   my @filenames = keys %$p->files;
 
 =head2 size
 
-The size method returns the sum of all the file sizes in BACKPAN:
+Returns the sum of all the file sizes in BACKPAN:
 
   print "BACKPAN is " . $p->size . " bytes\n";
 
