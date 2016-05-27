@@ -4,7 +4,10 @@ use warnings;
 use strict;
 
 use Test::More;
-eval "use Test::Pod 1.14";
+use Class::Load qw(try_load_class);
+
 plan skip_all => "Author test" unless $ENV{AUTHOR_TESTING};
-plan skip_all => "Test::Pod 1.14 required for testing POD: $@" if $@;
-all_pod_files_ok();
+my $min_tp = 1.14;
+try_load_class('Test::Pod', {-version => $min_tp})
+     or plan skip_all => "Test::Pod $min_tp required for testing POD";
+ Test::Pod::all_pod_files_ok();
