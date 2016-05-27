@@ -115,28 +115,41 @@ Returns the number of releases this distribution has.
 
 =head2 first_release
 
-=head2 latest_release
-
     my $release = $dist->first_release;
 
-Returns the first or latest release of this distribution as a
+Returns the first release of this distribution as a
+C<BackPAN::Index::Release>.
+
+=head2 latest_release
+
+    my $release = $dist->latest_release;
+
+Returns the latest release of this distribution as a
 C<BackPAN::Index::Release>.
 
 =head2 first_date
 
-=head2 latest_date
-
     my $release = $dist->first_date;
 
-Returns the date of the first or latest release of this distribution.
+Returns the date of the first release of this distribution.
+
+=head2 latest_date
+
+    my $release = $dist->latest_date;
+
+Returns the date of the latest release of this distribution.
 
 =head2 first_author
 
-=head2 latest_author
-
     my $cpanid = $dist->first_author;
 
-Returns the CPANID of the author of the first or latest release.
+Returns the CPANID of the author of the first release.
+
+=head2 latest_author
+
+    my $cpanid = $dist->latest_author
+
+Returns the CPANID of the author of the latest release.
 
 =head2 as_hash
 
