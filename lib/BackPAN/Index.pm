@@ -623,7 +623,7 @@ Michael G Schwern <schwern@pobox.com>
 
 =head1 COPYRIGHT
 
-Copyright 2009, Michael G Schwern
+Copyright 2009-2012, Michael G Schwern
 
 =head1 LICENSE
 
