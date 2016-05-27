@@ -69,5 +69,5 @@ requires:
 resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=BackPAN-Index
   license: http://dev.perl.org/licenses/
-  repository: http://github.com/acme/parse-backpan-packages
+  repository: http://github.com/book/BackPAN-Index
 version: 0.42

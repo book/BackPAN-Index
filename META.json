@@ -103,7 +103,7 @@
          "http://dev.perl.org/licenses/"
       ],
       "repository" : {
-         "url" : "http://github.com/acme/parse-backpan-packages"
+         "url" : "http://github.com/book/BackPAN-Index"
       }
    },
    "version" : "0.42"
