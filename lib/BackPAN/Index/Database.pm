@@ -48,7 +48,7 @@ has schema =>
 
 # If you change the schema, be sure to run ./Build result_classes
 # to update the result classes.
-# 
+#
 # This is denormalized for performance, its read-only anyway
 has create_tables_sql =>
   is		=> 'ro',
