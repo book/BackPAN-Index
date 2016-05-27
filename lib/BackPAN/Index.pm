@@ -635,8 +635,8 @@ the same terms as Perl itself.
 L<DBIx::Class::ResultSet>, L<BackPAN::Index::File>,
 L<BackPAN::Index::Release>, L<BackPAN::Index::Dist>
 
-Bugs:        L<http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages>
 Repository:  L<http://github.com/book/BackPAN-Index>
+Bugs:        L<https://rt.cpan.org/Public/Dist/Display.html?Name=BackPAN-Index>
 
 =cut
 

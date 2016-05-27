@@ -183,7 +183,6 @@ SEE ALSO
     DBIx::Class::ResultSet, BackPAN::Index::File, BackPAN::Index::Release,
     BackPAN::Index::Dist
 
-    <http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-BACKPAN-Packages
-    >
     Repository: <http://github.com/book/BackPAN-Index>
+    Bugs: <https://rt.cpan.org/Public/Dist/Display.html?Name=BackPAN-Index>
 
