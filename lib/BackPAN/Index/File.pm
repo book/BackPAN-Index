@@ -95,7 +95,7 @@ BackPAN::Index::File - Represent a file on BackPAN
 
 =head1 DESCRIPTION
 
-BackPAN::Index::File objects represent files on BackPAN.  It may
+BackPAN::Index::File objects represent files on BackPAN.  Such an object may
 represent a release, a readme or meta file or just some random stuff
 on BackPAN.
 

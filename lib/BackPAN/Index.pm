@@ -369,7 +369,7 @@ BackPAN::Index - An interface to the BackPAN index
 This downloads, caches and parses the BackPAN index into a local
 database for efficient querying.
 
-Its a pretty thin wrapper around DBIx::Class returning
+It's a pretty thin wrapper around DBIx::Class returning
 L<DBIx::Class::ResultSet> objects which makes it efficient and
 flexible.
 
@@ -598,8 +598,8 @@ sub releases_since {
 =head1 EXAMPLES
 
 The real power of BackPAN::Index comes from L<DBIx::Class::ResultSet>.
-Its very flexible and very powerful but not always obvious how to get
-it to do things.  Here's some examples.
+It's very flexible and very powerful but not always obvious how to get
+it to do things.  Here are some examples.
 
     # How many files are on BackPAN?
     my $count = $backpan->files->count;
