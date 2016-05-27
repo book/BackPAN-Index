@@ -82,7 +82,7 @@ BackPAN::Index::Dist - Representing a distribution on BackPAN
 
 =head1 SYNOPSIS
 
-Use through BackPAN::Index.
+Use through C<BackPAN::Index>.
 
 =head1 DESCRIPTION
 
@@ -93,7 +93,7 @@ made up of releases.
 
     my $releases = $dist->releases;
 
-A ResultSet of this distribution's releases.
+A C<ResultSet> of this distribution's releases.
 
 =head2 name
 
@@ -105,7 +105,7 @@ Name of the distribution.
 
     my @authors = $dist->authors;
 
-Return the CPANIDs which made releases of this $dist, in no particular order.
+Return the CPANIDs which made releases of this C<$dist>, in no particular order.
 
 =head2 num_releases
 
@@ -119,7 +119,8 @@ Returns the number of releases this distribution has.
 
     my $release = $dist->first_release;
 
-Returns the first or latest release of this distribution as a BackPAN::Index::Release.
+Returns the first or latest release of this distribution as a
+C<BackPAN::Index::Release>.
 
 =head2 first_date
 

@@ -155,7 +155,7 @@ Parse::BACKPAN::Packages - Provide an index of BACKPAN
 
 =head1 DESCRIPTION
 
-Parse::BackPAN::Packages has been B<DEPRECATED>.  Please use the
+C<Parse::BackPAN::Packages> has been B<DEPRECATED>.  Please use the
 faster and more flexible L<BackPAN::Index>.
 
 The Comprehensive Perl Archive Network (CPAN) is a very useful
@@ -185,7 +185,7 @@ want this caching then you can pass in:
 =head2 authors
 
 Returns a list of all the authors. This is meant so that you can pass them
-into the distributions_by method:
+into the C<distributions_by> method:
 
   my @authors = $p->authors;
 
@@ -221,7 +221,7 @@ Finds metadata relating to a file:
 =head2 files
 
 Returns a hash reference where the keys are the filenames of the files on
-CPAN and the values are Parse::BACKPAN::Packages::File objects:
+CPAN and the values are C<Parse::BACKPAN::Packages::File> objects:
 
   my @filenames = keys %$p->files;
 

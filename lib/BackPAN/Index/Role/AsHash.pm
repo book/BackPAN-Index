@@ -28,7 +28,7 @@ BackPAN::Index::Role::AsHash - Role to dump object data as a hash
 
 =head1 DESCRIPTION
 
-A role to implement C<<as_hash>> in result objects.
+A role to implement C<< as_hash >> in result objects.
 
 =head2 Requires
 
