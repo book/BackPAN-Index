@@ -1,27 +1,26 @@
 package Parse::BACKPAN::Packages;
 
-use strict;
-use warnings;
-
 our $VERSION = '0.40';
 
-use Mouse;
-use BackPAN::Index::Types;
+use Moo;
+use Types::Standard qw(Bool InstanceOf);
+
+use namespace::clean;
 
 has no_cache =>
   is		=> 'ro',
-  isa		=> 'Bool',
+  isa		=> Bool,
   default 	=> 0;
 
 has only_authors =>
   is		=> 'ro',
-  isa		=> 'Bool',
+  isa		=> Bool,
   default	=> 1
 ;
 
 has _delegate =>
   is	=> 'rw',
-  isa	=> 'BackPAN::Index';
+  isa	=> InstanceOf['BackPAN::Index'];
 
 
 sub BUILD {

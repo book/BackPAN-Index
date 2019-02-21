@@ -1,12 +1,11 @@
 package BackPAN::Index::Role::HasCache;
 
-use Mouse::Role;
-
-use BackPAN::Index::Types;
+use Types::Standard qw(InstanceOf);
+use Moo::Role;
 
 has cache =>
   is		=> 'ro',
-  isa		=> 'App::Cache',
+  isa		=> InstanceOf['App::Cache'],
   required 	=> 1,
   default	=> sub {
       require App::Cache;

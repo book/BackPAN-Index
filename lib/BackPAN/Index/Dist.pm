@@ -51,7 +51,7 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07033 @ 2012-12-27 01:39:08
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BuglboqFzRDZo6vlK4n0yw
 
-use Mouse;
+use Moo;
 with 'BackPAN::Index::Role::AsHash';
 
 use overload

@@ -1,6 +1,6 @@
 package BackPAN::Index::Role::AsHash;
 
-use Mouse::Role;
+use Moo::Role;
 
 requires qw(data_methods);
 

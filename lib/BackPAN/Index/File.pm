@@ -29,7 +29,7 @@ __PACKAGE__->might_have(
 # Created by DBIx::Class::Schema::Loader v0.07033 @ 2012-12-27 01:39:08
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gqi9QR+IxPMmdduz2/1BHA
 
-use Mouse;
+use Moo;
 with 'BackPAN::Index::Role::AsHash';
 
 use URI;

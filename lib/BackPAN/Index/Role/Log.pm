@@ -1,10 +1,11 @@
 package BackPAN::Index::Role::Log;
 
-use Mouse::Role;
+use Types::Standard qw(Bool);
+use Moo::Role;
 
 has debug =>
   is		=> 'ro',
-  isa		=> 'Bool',
+  isa		=> Bool,
   default	=> 0;
 
 sub _log {
