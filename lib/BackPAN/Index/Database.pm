@@ -1,24 +1,27 @@
 package BackPAN::Index::Database;
 
-use Mouse;
+use Moo;
 with 'BackPAN::Index::Role::HasCache';
 
-use BackPAN::Index::Types;
-use Path::Class;
+use Types::Standard qw(Str InstanceOf HashRef ArrayRef);
+use Types::Path::Tiny qw(Path);
+use Path::Tiny qw(path);
+
+use namespace::clean;
 
 has db_file =>
   is		=> 'ro',
-  isa		=> 'Path::Class::File',
+  isa		=> Path,
   lazy		=> 1,
   coerce	=> 1,
   default	=> sub {
       my $self = shift;
-      return Path::Class::File->new($self->cache->directory, "backpan.sqlite").'';
+      return path($self->cache->directory, "backpan.sqlite");
   };
 
 has dsn =>
   is		=> 'ro',
-  isa		=> 'Str',
+  isa		=> Str,
   lazy          => 1,
   default	=> sub {
       my $self = shift;
@@ -27,7 +30,7 @@ has dsn =>
 
 has dbh =>
   is		=> 'ro',
-  isa		=> 'DBI::db',
+  isa		=> InstanceOf['DBI::db'],
   lazy          => 1,
   default	=> sub {
       my $self = shift;
@@ -37,7 +40,7 @@ has dbh =>
 
 has schema =>
   is		=> 'ro',
-  isa		=> 'DBIx::Class::Schema',
+  isa		=> InstanceOf['DBIx::Class::Schema'],
   lazy		=> 1,
   default	=> sub {
       my $self = shift;
@@ -52,7 +55,7 @@ has schema =>
 # This is denormalized for performance, its read-only anyway
 has create_tables_sql =>
   is		=> 'ro',
-  isa		=> 'HashRef[Str]',
+  isa		=> HashRef[Str],
   default 	=> sub {
       return {
         files           => <<'SQL',
@@ -92,7 +95,7 @@ SQL
 
 has create_indexes_sql =>
   is		=> 'ro',
-  isa		=> 'ArrayRef[Str]',
+  isa		=> ArrayRef[Str],
   default	=> sub {
       return [
 	  # Speed up dists_by several orders of magnitude
@@ -134,7 +137,7 @@ sub create_indexes {
 
 sub db_file_exists {
     my $self = shift;
-    return -e $self->db_file;
+    return $self->db_file->exists;
 }
 
 sub should_update_db {

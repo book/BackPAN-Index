@@ -1,41 +1,41 @@
 package BackPAN::Index;
 
-use strict;
-use warnings;
+use Moo;
+with 'BackPAN::Index::Role::Log', 'BackPAN::Index::Role::HasCache';
 
 our $VERSION = '0.42';
 
 use autodie;
 use CPAN::DistnameInfo 0.09;
 use BackPAN::Index::Schema;
-use BackPAN::Index::Types;
+use Types::Standard qw(InstanceOf Bool Int Str HashRef);
+use Types::URI qw(Uri);
 
-use Mouse;
-with 'BackPAN::Index::Role::Log', 'BackPAN::Index::Role::HasCache';
+use namespace::clean;
 
 has update =>
   is		=> 'ro',
-  isa		=> 'Bool',
+  isa		=> Bool,
   default	=> 0;
 
 has cache_ttl =>
   is		=> 'ro',
-  isa		=> 'Int',
+  isa		=> Int,
   default	=> 60 * 60;
 
 has releases_only_from_authors =>
   is		=> 'ro',
-  isa		=> 'Bool',
+  isa		=> Bool,
   default	=> 1;
 
 has normalize =>
   is            => 'ro',
-  isa           => 'Bool',
+  isa           => Bool,
   default       => 1;
 
 has backpan_index_url =>
   is		=> 'ro',
-  isa		=> 'URI',
+  isa		=> Uri,
   coerce        => 1,
   builder       => 'default_backpan_index_url';
 
@@ -45,7 +45,7 @@ sub default_backpan_index_url {
 
 has backpan_index =>
   is		=> 'ro',
-  isa		=> 'BackPAN::Index::IndexFile',
+  isa		=> InstanceOf['BackPAN::Index::IndexFile'],
   lazy		=> 1,
   default	=> sub {
       my $self = shift;
@@ -59,7 +59,7 @@ has backpan_index =>
 
 has cache_dir =>
   is		=> 'ro',
-  isa		=> 'Str'
+  isa		=> Str
 ;
 
 has '+cache' =>
@@ -81,7 +81,7 @@ has '+cache' =>
 
 has db =>
   is		=> 'ro',
-  isa		=> 'BackPAN::Index::Database',
+  isa		=> InstanceOf['BackPAN::Index::Database'],
   handles	=> [qw(schema)],
   lazy		=> 1,
   default	=> sub {
@@ -95,7 +95,7 @@ has db =>
 
 has normalize_dist_names =>
   is            => 'ro',
-  isa           => 'HashRef',
+  isa           => HashRef,
   default       => sub {
       return {
           uri                             => 'URIC',
@@ -105,7 +105,7 @@ has normalize_dist_names =>
 
 has normalize_releases =>
   is            => 'ro',
-  isa           => 'HashRef',
+  isa           => HashRef,
   default       => sub {
       return {
           # This is 箆-0.01.  I went with the unidecoded name instead

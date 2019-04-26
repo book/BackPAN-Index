@@ -13,7 +13,6 @@ lib/BackPAN/Index/Role/AsHash.pm
 lib/BackPAN/Index/Role/HasCache.pm
 lib/BackPAN/Index/Role/Log.pm
 lib/BackPAN/Index/Schema.pm
-lib/BackPAN/Index/Types.pm
 lib/Parse/BACKPAN/Packages.pm
 LICENSE
 MANIFEST			This list of files
@@ -30,10 +29,10 @@ t/cgi.t
 t/distributions.t
 t/file.t
 t/lib/TestUtils.pm
+t/normalize.t
 t/only_authors.t
 t/Parse-BACKPAN-Packages/args.t
 t/Parse-BACKPAN-Packages/simple.t
 t/pod.t
 t/pod_coverage.t
 t/stringify.t
-t/types.t

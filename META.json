@@ -5,13 +5,13 @@
       "Michael G Schwern <schwern@pobox.com>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4003, CPAN::Meta::Converter version 2.120630",
+   "generated_by" : "Module::Build version 0.4224",
    "license" : [
       "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : "2"
+      "version" : 2
    },
    "name" : "BackPAN-Index",
    "prereqs" : {
@@ -35,8 +35,11 @@
             "DBD::SQLite" : "1.25",
             "DBIx::Class" : "0.08109",
             "LWP::Simple" : "0",
-            "Mouse" : "0.64",
-            "Path::Class" : "0.17",
+            "Moo" : "2.000000",
+            "Path::Tiny" : "0.103",
+            "Types::Path::Tiny" : "0.005",
+            "Types::Standard" : "1.004000",
+            "Types::URI" : "0.006",
             "URI" : "1.54",
             "autodie" : "0",
             "parent" : "0",
@@ -50,44 +53,31 @@
          "version" : "0.42"
       },
       "BackPAN::Index::Database" : {
-         "file" : "lib/BackPAN/Index/Database.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/Database.pm"
       },
       "BackPAN::Index::Dist" : {
-         "file" : "lib/BackPAN/Index/Dist.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/Dist.pm"
       },
       "BackPAN::Index::File" : {
-         "file" : "lib/BackPAN/Index/File.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/File.pm"
       },
       "BackPAN::Index::IndexFile" : {
-         "file" : "lib/BackPAN/Index/IndexFile.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/IndexFile.pm"
       },
       "BackPAN::Index::Release" : {
-         "file" : "lib/BackPAN/Index/Release.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/Release.pm"
       },
       "BackPAN::Index::Role::AsHash" : {
-         "file" : "lib/BackPAN/Index/Role/AsHash.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/Role/AsHash.pm"
       },
       "BackPAN::Index::Role::HasCache" : {
-         "file" : "lib/BackPAN/Index/Role/HasCache.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/Role/HasCache.pm"
       },
       "BackPAN::Index::Role::Log" : {
-         "file" : "lib/BackPAN/Index/Role/Log.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/Role/Log.pm"
       },
       "BackPAN::Index::Schema" : {
-         "file" : "lib/BackPAN/Index/Schema.pm",
-         "version" : 0
-      },
-      "BackPAN::Index::Types" : {
-         "file" : "lib/BackPAN/Index/Types.pm",
-         "version" : 0
+         "file" : "lib/BackPAN/Index/Schema.pm"
       },
       "Parse::BACKPAN::Packages" : {
          "file" : "lib/Parse/BACKPAN/Packages.pm",
@@ -106,5 +96,6 @@
          "url" : "http://github.com/acme/parse-backpan-packages"
       }
    },
-   "version" : "0.42"
+   "version" : "0.42",
+   "x_serialization_backend" : "JSON::PP version 4.00"
 }

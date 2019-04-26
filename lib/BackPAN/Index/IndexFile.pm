@@ -1,36 +1,40 @@
 package BackPAN::Index::IndexFile;
 
-use Mouse;
+use Moo;
 with 'BackPAN::Index::Role::Log', 'BackPAN::Index::Role::HasCache';
 
 use LWP::Simple qw(getstore head is_success);
-use BackPAN::Index::Types;
+use Path::Tiny qw(path);
+use Types::Path::Tiny qw(Path);
+use Types::URI qw(Uri);
+
+use namespace::clean;
 
 has index_url =>
   is		=> 'ro',
-  isa		=> 'URI',
+  isa		=> Uri,
   coerce	=> 1,
   required	=> 1;
 
 has index_archive =>
   is		=> 'ro',
-  isa		=> 'Path::Class::File',
+  isa		=> Path,
   lazy		=> 1,
   default	=> sub {
       my $self = shift;
 
-      my $path = $self->index_url->path;
-      my $file = Path::Class::File->new($path)->basename;
-      return Path::Class::File->new($file)->absolute($self->cache->directory);
+      my $path = path($self->index_url->path);
+      my $file = $path->basename;
+      return path($file)->absolute($self->cache->directory);
   };
 
 has index_file =>
   is		=> 'ro',
-  isa		=> 'Path::Class::File',
+  isa		=> Path,
   lazy		=> 1,
   default	=> sub {
       my $self = shift;
-      return Path::Class::File->new("backpan-index.txt")->absolute($self->cache->directory);
+      return path("backpan-index.txt")->absolute($self->cache->directory);
   };
 
 sub index_archive_mtime {
