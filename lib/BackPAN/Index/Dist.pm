@@ -82,7 +82,7 @@ BackPAN::Index::Dist - Representing a distribution on BackPAN
 
 =head1 SYNOPSIS
 
-Use through BackPAN::Index.
+Use through C<BackPAN::Index>.
 
 =head1 DESCRIPTION
 
@@ -93,7 +93,7 @@ made up of releases.
 
     my $releases = $dist->releases;
 
-A ResultSet of this distribution's releases.
+A C<ResultSet> of this distribution's releases.
 
 =head2 name
 
@@ -105,7 +105,7 @@ Name of the distribution.
 
     my @authors = $dist->authors;
 
-Return the CPANIDs which made releases of this $dist, in no particular order.
+Return the CPANIDs which made releases of this C<$dist>, in no particular order.
 
 =head2 num_releases
 
@@ -115,27 +115,41 @@ Returns the number of releases this distribution has.
 
 =head2 first_release
 
-=head2 latest_release
-
     my $release = $dist->first_release;
 
-Returns the first or latest release of this distribution as a BackPAN::Index::Release.
+Returns the first release of this distribution as a
+C<BackPAN::Index::Release>.
+
+=head2 latest_release
+
+    my $release = $dist->latest_release;
+
+Returns the latest release of this distribution as a
+C<BackPAN::Index::Release>.
 
 =head2 first_date
 
-=head2 latest_date
-
     my $release = $dist->first_date;
 
-Returns the date of the first or latest release of this distribution.
+Returns the date of the first release of this distribution.
+
+=head2 latest_date
+
+    my $release = $dist->latest_date;
+
+Returns the date of the latest release of this distribution.
 
 =head2 first_author
 
-=head2 latest_author
-
     my $cpanid = $dist->first_author;
 
-Returns the CPANID of the author of the first or latest release.
+Returns the CPANID of the author of the first release.
+
+=head2 latest_author
+
+    my $cpanid = $dist->latest_author
+
+Returns the CPANID of the author of the latest release.
 
 =head2 as_hash
 

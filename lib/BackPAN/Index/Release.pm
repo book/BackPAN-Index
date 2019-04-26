@@ -105,10 +105,10 @@ BackPAN::Index::Release - A single release of a distribution
 
 =head1 DESCRIPTION
 
-BackPAN::Index::Release objects represent releases,
+C<BackPAN::Index::Release> objects represent releases,
 individual tarballs/zip files, of a distribution on BackPAN.
 
-For example, Acme-Pony-1.2.3.tar.gz is a release of the Acme-Pony
+For example, C<Acme-Pony-1.2.3.tar.gz> is a release of the C<Acme-Pony>
 distribution.
 
 =head1 METHODS

@@ -369,7 +369,7 @@ BackPAN::Index - An interface to the BackPAN index
 This downloads, caches and parses the BackPAN index into a local
 database for efficient querying.
 
-Its a pretty thin wrapper around DBIx::Class returning
+It's a pretty thin wrapper around DBIx::Class returning
 L<DBIx::Class::ResultSet> objects which makes it efficient and
 flexible.
 
@@ -397,7 +397,7 @@ new() takes some options
 
 =head3 update
 
-Because it is rather large, BackPAN::Index caches a copy of the
+Because it is rather large, C<BackPAN::Index> caches a copy of the
 BackPAN index and builds a local database to speed access.  This flag
 controls if the local index is updated.
 
@@ -478,16 +478,16 @@ Defaults to a sensible location.
 
     my $files = $backpan->files;
 
-Returns a ResultSet representing all the files on BackPAN.
+Returns a C<ResultSet> representing all the files on BackPAN.
 
 =head2 files_by
 
     my $files = $backpan->files_by($cpanid);
     my @files = $backpan->files_by($cpanid);
 
-Returns all the files by a given $cpanid.
+Returns all the files by a given C<< $cpanid >>.
 
-Returns either a list of BackPAN::Index::Files or a ResultSet.
+Returns either a list of C<BackPAN::Index::Files> or a C<ResultSet>.
 
 =cut
 
@@ -502,13 +502,13 @@ sub files_by {
 
     my $dists = $backpan->dists;
 
-Returns a ResultSet representing all the distributions on BackPAN.
+Returns a C<ResultSet> representing all the distributions on BackPAN.
 
 =head2 dist
 
     my $dists = $backpan->dist($dist_name);
 
-Returns a single BackPAN::Index::Dist object for $dist_name.
+Returns a single C<BackPAN::Index::Dist> object for C<< $dist_name >>.
 
 =head2 dists_by
 
@@ -516,9 +516,9 @@ Returns a single BackPAN::Index::Dist object for $dist_name.
     my @dists = $backpan->dists_by($cpanid);
 
 Returns the dists which contain at least one release by the given
-$cpanid.
+C<< $cpanid >>.
 
-Returns either a ResultSet or a list of the Dists.
+Returns either a C<ResultSet> or a list of the Dists.
 
 =cut
 
@@ -534,7 +534,8 @@ sub dists_by {
 
     my $dists = $backpan->dists_changed_since($time);
 
-Returns a ResultSet of distributions which have had releases at or after after $time.
+Returns a C<ResultSet> of distributions which have had releases at or after
+after C<< $time >>.
 
 =cut
 
@@ -550,15 +551,15 @@ sub dists_changed_since {
     my $all_releases  = $backpan->releases();
     my $dist_releases = $backpan->releases($dist_name);
 
-Returns a ResultSet representing all the releases on BackPAN.  If a
-$dist_name is given it returns the releases of just one distribution.
+Returns a C<ResultSet> representing all the releases on BackPAN.  If a
+C<< $dist_name >> is given it returns the releases of just one distribution.
 
 =head2 release
 
     my $release = $backpan->release($dist_name, $version);
 
-Returns a single BackPAN::Index::Release object for the given
-$dist_name and $version.
+Returns a single C<BackPAN::Index::Release> object for the given
+C<< $dist_name >> and C<< $version >>.
 
 =head2 releases_by
 
@@ -567,7 +568,7 @@ $dist_name and $version.
 
 Returns all the releases of a single author.
 
-Returns either a list of Releases or a ResultSet representing those releases.
+Returns either a list of Releases or a C<ResultSet> representing those releases.
 
 =cut
 
@@ -583,7 +584,7 @@ sub releases_by {
 
     my $releases = $backpan->releases_since($time);
 
-Returns a ResultSet of releases which were released at or after $time.
+Returns a C<ResultSet> of releases which were released at or after C<< $time >>.
 
 =cut
 
@@ -597,9 +598,9 @@ sub releases_since {
 
 =head1 EXAMPLES
 
-The real power of BackPAN::Index comes from L<DBIx::Class::ResultSet>.
-Its very flexible and very powerful but not always obvious how to get
-it to do things.  Here's some examples.
+The real power of C<BackPAN::Index> comes from L<DBIx::Class::ResultSet>.
+It's very flexible and very powerful but not always obvious how to get
+it to do things.  Here are some examples.
 
     # How many files are on BackPAN?
     my $count = $backpan->files->count;
