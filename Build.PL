@@ -40,8 +40,8 @@ my $build = MyBuilder->new(
 
   meta_merge => {
       resources             => {
-          bugtracker        => 'http://rt.cpan.org/Public/Dist/Display.html?Name=BackPAN-Index',
-          repository        => 'http://github.com/acme/parse-backpan-packages',
+          bugtracker        => 'http://github.com/book/BackPAN-Index/issues',
+          repository        => 'http://github.com/book/BackPAN-Index',
       },
   },
 
