@@ -13,6 +13,7 @@ my $build = MyBuilder->new(
 
   requires           => {
     'App::Cache'            => '0.37',
+    'Class::Load'           => '0',
     'CPAN::DistnameInfo'    => '0.09',
     CLASS                   => '1.00',
     'LWP::Simple'           => '0',
