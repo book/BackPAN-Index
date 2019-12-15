@@ -175,7 +175,7 @@ Leon Brocard <acme@astray.com> and Michael G Schwern <schwern@pobox.com>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005-2009, Leon Brocard
+Copyright (C) 2005-2012, Leon Brocard
 
 This module is free software; you can redistribute it or modify it under
 the same terms as Perl itself.
