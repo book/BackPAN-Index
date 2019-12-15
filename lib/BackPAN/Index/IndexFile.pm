@@ -84,7 +84,7 @@ sub extract_index_file {
 
 sub get_index {
     my $self = shift;
-    
+
     my $url = $self->index_url;
 
     $self->_log("Fetching BackPAN index from $url...");
