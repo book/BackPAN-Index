@@ -33,7 +33,7 @@ my $build = MyBuilder->new(
 
   build_requires     => {
     'Test::More'            => '0.90',
-    'Test::Compile'         => '0.11',
+    'Test::Compile'         => '1.3.0',
   },
 
   configure_requires => {
