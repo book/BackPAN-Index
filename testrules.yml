@@ -1,0 +1,7 @@
+---
+# This test suite needs the t/00* files to be run first, then it can run in parallel
+seq:
+    - seq: t/00*.t
+    - par:
+        - t/*.t
+        - xt/*.t
