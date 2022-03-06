@@ -43,7 +43,6 @@ provides:
 requires:
   App::Cache: '0.37'
   Archive::Extract: '0'
-  CLASS: '1.00'
   CPAN::DistnameInfo: '0.09'
   DBD::SQLite: '1.25'
   DBIx::Class: '0.08109'
