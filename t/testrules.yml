@@ -1,0 +1,3 @@
+seq:
+  - seq: t/00setup.t
+  - par: **
