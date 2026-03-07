@@ -14,7 +14,6 @@ my $build = MyBuilder->new(
   requires           => {
     'App::Cache'            => '0.37',
     'CPAN::DistnameInfo'    => '0.09',
-    CLASS                   => '1.00',
     'LWP::Simple'           => '0',
     'URI'                   => '1.54',
     'Archive::Extract'      => '0',
