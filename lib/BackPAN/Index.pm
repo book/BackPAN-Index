@@ -191,7 +191,7 @@ sub _populate_database {
 
     my %dists;
     my %files;
-    open my $fh, $self->backpan_index->index_file;
+    open my $fh, "<", $self->backpan_index->index_file;
     while( my $line = <$fh> ) {
         my %release;
         chomp $line;
