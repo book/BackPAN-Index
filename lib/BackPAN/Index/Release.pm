@@ -79,6 +79,13 @@ sub prefix {
     return $self->path;
 }
 
+sub short_path {
+    my $self = shift;
+    my $path = $self->path;
+    $path =~ s{^authors/id/\w/\w{2}/}{};
+    return $path;
+}
+
 1;
 
 __END__
@@ -131,11 +138,29 @@ Returns the date of the release, in UNIX epoch seconds.
 
 Returns the name of the distribution this release belongs to.
 
+This is a L<BackPAN::Index::Dist> object.
+
 =head2 distvname
 
     my $distvname = $release->distvname;
 
 Returns the name of the distribution, hyphen, and version.
+
+=head2 path
+
+    my $path = $release->path;
+
+Returns the full path on CPAN to the release.  This is a
+L<BackPAN::Index::File> object.
+
+=head2 short_path
+
+    my $short_path = $release->short_path;
+
+Returns the path to CPAN without the F<authors/id/X/XY/> part.
+
+For example, F<authors/id/L/LB/LBROCARD/Acme-Colour-0.16.tar.gz> has a
+short_path of F<LBROCARD/Acme-Colour-0.16.tar.gz>.
 
 =head2 filename
 
@@ -148,13 +173,6 @@ Returns the filename of the release, just the file part.
     my $maturity = $release->maturity;
 
 Returns the maturity of the release.
-
-=head2 path
-
-    my $path = $release->path;
-
-Returns the full path on CPAN to the release.  This is a
-L<BackPAN::File> object.
 
 =head2 version
 
