@@ -61,7 +61,7 @@ sub files {
     while( my $file = $rs->next ) {
         $files{$file->path} = $file;
     }
-    
+
     return \%files;
 }
 
@@ -148,7 +148,7 @@ Parse::BACKPAN::Packages - Provide an index of BACKPAN
 
   # see Parse::BACKPAN::Packages::Release
   my @acme_colours = $p->releases("Acme-Colour");
-  
+
   my @authors = $p->authors;
   my @acmes = $p->distributions_by('LBROCARD');
 
